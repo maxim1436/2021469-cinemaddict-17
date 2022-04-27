@@ -1,7 +1,7 @@
 # Проект «Киноман»
 
 * Студент: [Максим Пиванов](https://up.htmlacademy.ru/ecmascript/17/user/2021469).
-* Наставник: `Неизвестно`.
+* Наставник: [Александр Бабченко](https://htmlacademy.ru/profile/babtshe).
 
 ---
 
