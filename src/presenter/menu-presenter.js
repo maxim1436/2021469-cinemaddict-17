@@ -4,14 +4,14 @@ import FilmsView from '../view/films-view.js';
 import FilmsListView from '../view/films-list-view.js';
 import FilmCardView from '../view/film-card-view.js';
 import ShowMoreButonView from '../view/show-more-button-view.js';
-import PopupView from '../view/popup-view.js';
+// import PopupView from '../view/popup-view.js';
 import FilmCounterdView from '../view/film-counter-view.js';
 import TopRatedView from '../view/top-rated-view.js';
 import MostCommentedView from '../view/most-commented-view.js';
 import {render} from '../render.js';
 
 const siteFooterElement = document.querySelector('.footer');
-const siteBodyElement = document.querySelector('body');
+// const siteBodyElement = document.querySelector('body');
 
 export default class MenuPresenter {
   films = new FilmsView();
