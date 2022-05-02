@@ -43,7 +43,7 @@ export default class MenuPresenter {
     render(new FilmCardView(), this.mostCommentedContainer);
     render(new FilmCardView(), this.mostCommentedContainer);
 
-    render(new PopupView(), siteBodyElement);
+    // render(new PopupView(), siteBodyElement);
     render(new FilmCounterdView(), siteFooterElement);
   };
 }
