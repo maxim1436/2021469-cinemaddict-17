@@ -1,6 +1,6 @@
 import { createElement } from '../render';
 
-const createPopupTemplate = () => `
+const createPopupTemplate = () => (`
   <section class="film-details">
     <form class="film-details__inner" action="" method="get">
       <div class="film-details__top-container">
@@ -165,7 +165,7 @@ const createPopupTemplate = () => `
       </div>
     </form>
   </section>
-`;
+`);
 
 export default class PopupView {
   getTemplate () {
@@ -181,6 +181,6 @@ export default class PopupView {
   }
 
   removeElement () {
-    this.element = null;
+    this.element = this.element.remove();
   }
 }

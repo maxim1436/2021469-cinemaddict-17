@@ -1,10 +1,10 @@
 import { createElement } from '../render';
 
-const createFilmCounterTemplate = () => `
+const createFilmCounterTemplate = () => (`
   <section class="footer__statistics">
     <p>130 291 movies inside</p>
   </section>
-`;
+`);
 
 export default class FilmCounterdView {
   getTemplate () {
@@ -20,6 +20,6 @@ export default class FilmCounterdView {
   }
 
   removeElement () {
-    this.element = null;
+    this.element = this.element.remove();
   }
 }

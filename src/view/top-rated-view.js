@@ -1,11 +1,11 @@
 import { createElement } from '../render';
 
-const createTopRatedTemplate = () => `
+const createTopRatedTemplate = () => (`
   <section class="films-list films-list--extra">
     <h2 class="films-list__title">Top rated</h2>
     <div class="films-list__container"></div>
   </section>
-`;
+`);
 
 export default class TopRatedView {
   getTemplate () {
@@ -21,6 +21,6 @@ export default class TopRatedView {
   }
 
   removeElement () {
-    this.element = null;
+    this.element = this.element.remove();
   }
 }

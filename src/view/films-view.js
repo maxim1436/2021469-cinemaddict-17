@@ -1,8 +1,8 @@
 import { createElement } from '../render';
 
-const createFilmsTemplate = () => `
+const createFilmsTemplate = () => (`
   <section class="films"></section>
-`;
+`);
 
 export default class FilmsView {
   getTemplate () {
@@ -18,6 +18,6 @@ export default class FilmsView {
   }
 
   removeElement () {
-    this.element = null;
+    this.element = this.element.remove();
   }
 }

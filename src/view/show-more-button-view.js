@@ -1,8 +1,8 @@
 import { createElement } from '../render';
 
-const createShowMoreButtonTemplate = () => `
+const createShowMoreButtonTemplate = () => (`
   <button class="films-list__show-more">Show more</button>
-`;
+`);
 
 export default class ShowMoreButonView {
   getTemplate () {
@@ -18,6 +18,6 @@ export default class ShowMoreButonView {
   }
 
   removeElement () {
-    this.element = null;
+    this.element = this.element.remove();
   }
 }

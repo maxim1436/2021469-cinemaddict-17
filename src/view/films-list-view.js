@@ -1,11 +1,11 @@
 import { createElement } from '../render';
 
-const createFilmsListTemplate = () => `
+const createFilmsListTemplate = () => (`
   <section class="films-list">
     <h2 class="films-list__title visually-hidden">All movies. Upcoming</h2>
     <div class="films-list__container"></div>
   </section>
-`;
+`);
 
 export default class FilmsListView {
   getTemplate () {
@@ -21,6 +21,6 @@ export default class FilmsListView {
   }
 
   removeElement () {
-    this.element = null;
+    this.element = this.element.remove();
   }
 }
