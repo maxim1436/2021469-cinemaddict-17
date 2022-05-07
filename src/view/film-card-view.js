@@ -14,6 +14,8 @@ const createFilmCardTemplate = (card) => {
     },
     comments
   } = card;
+  const filmHoursAmount = Math.floor(runTime / MINUTES_IN_HOUR);
+  const filmMinutesAmount = runTime - (MINUTES_IN_HOUR * Math.floor(runTime / MINUTES_IN_HOUR));
   return (`
     <article class="film-card">
     <a class="film-card__link">
@@ -21,7 +23,7 @@ const createFilmCardTemplate = (card) => {
       <p class="film-card__rating">${totalRating}</p>
       <p class="film-card__info">
         <span class="film-card__year">1929</span>
-        <span class="film-card__duration">${Math.floor(runTime / MINUTES_IN_HOUR)}h ${runTime - (MINUTES_IN_HOUR * Math.floor(runTime / MINUTES_IN_HOUR))}m</span>
+        <span class="film-card__duration">${filmHoursAmount}h ${filmMinutesAmount}m</span>
         <span class="film-card__genre">${genre.join(', ')}</span>
       </p>
       <img src=${poster} alt="" class="film-card__poster">

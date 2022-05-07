@@ -23,31 +23,30 @@ export default class MenuPresenter {
   mostCommented = new MostCommentedView();
   mostCommentedContainer = this.mostCommented.getElement().querySelector('div');
 
-  init = (menuContainer, dataObjects) => {
+  init = (menuContainer, data) => {
     this.menuContainer = menuContainer;
-    this.dataObjects = dataObjects;
-    this.filmData = [...this.dataObjects.getFilms()];
-    this.commentData = [...this.dataObjects.getComments()];
+    this.data = data;
+    this.filmsData = this.data.getData();
 
     render(new NavigationView(), this.menuContainer);
     render(new SortView(), this.menuContainer);
     render(this.films, this.menuContainer);
     render(this.filmsList, this.films.getElement());
 
-    for (let i = 0; i < this.filmData.length; i++) {
-      render(new FilmCardView(this.filmData[i]), this.filmsListContainer);
+    for (let i = 0; i < this.filmsData.length; i++) {
+      render(new FilmCardView(this.filmsData[i]), this.filmsListContainer);
     }
     render(new ShowMoreButonView(), this.filmsList.getElement());
 
     render(this.topRated, this.films.getElement());
-    render(new FilmCardView(this.filmData[getRandomInteger(0, this.filmData.length - 1)]), this.topRatedFilmsContainer);
-    render(new FilmCardView(this.filmData[getRandomInteger(0, this.filmData.length - 1)]), this.topRatedFilmsContainer);
+    render(new FilmCardView(this.filmsData[getRandomInteger(0, this.filmsData.length - 1)]), this.topRatedFilmsContainer);
+    render(new FilmCardView(this.filmsData[getRandomInteger(0, this.filmsData.length - 1)]), this.topRatedFilmsContainer);
 
     render(this.mostCommented, this.films.getElement());
-    render(new FilmCardView(this.filmData[getRandomInteger(0, this.filmData.length - 1)]), this.mostCommentedContainer);
-    render(new FilmCardView(this.filmData[getRandomInteger(0, this.filmData.length - 1)]), this.mostCommentedContainer);
+    render(new FilmCardView(this.filmsData[getRandomInteger(0, this.filmsData.length - 1)]), this.mostCommentedContainer);
+    render(new FilmCardView(this.filmsData[getRandomInteger(0, this.filmsData.length - 1)]), this.mostCommentedContainer);
 
-    render(new PopupView(this.filmData[getRandomInteger(0, this.filmData.length - 1)], this.commentData), siteBodyElement);
+    render(new PopupView(this.filmsData[getRandomInteger(0, this.filmsData.length - 1)]), siteBodyElement);
     render(new FilmCounterdView(), siteFooterElement);
   };
 }

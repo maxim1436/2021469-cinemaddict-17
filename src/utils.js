@@ -10,7 +10,7 @@ export const getRandomInteger = (a = 0, b = 1) => {
   return Math.floor(lower + Math.random() * (upper - lower + 1));
 };
 
-export function getRandomFraction (min, max, rate) {
+export const getRandomFraction = (min, max, rate) => {
   if ((max < 0) || (min < 0)) {
     throw RangeError('The argument must not be negative');
   }
@@ -19,9 +19,9 @@ export function getRandomFraction (min, max, rate) {
     ((a * (max - min)) + min).toFixed(rate) :
     ((a * (min - max)) + max).toFixed(rate);
   return parseFloat(result);
-}
+};
 
-export function getNonRepeatingNumber (array, min, max) {
+export const getNonRepeatingNumber = (array, min, max) => {
   const elem = getRandomInteger(min, max);
   if (array.includes(elem) === false) {
     array.push(elem);
@@ -29,4 +29,6 @@ export function getNonRepeatingNumber (array, min, max) {
   } else {
     return getNonRepeatingNumber(array, min, max);
   }
-}
+};
+
+export const getRandomElementOfArray = (array) => array[getRandomInteger(0, array.length - 1)];

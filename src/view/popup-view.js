@@ -3,7 +3,7 @@ import { humanizeFilmReleaseDate, humanizeCommentReleaseDate } from '../utils';
 
 const MINUTES_IN_HOUR = 60;
 
-const createPopupTemplate = (card, comments) => {
+const createPopupTemplate = (card) => {
   const {
     filmInfo: {
       title,
@@ -21,8 +21,11 @@ const createPopupTemplate = (card, comments) => {
       genre,
       ageRating
     },
-    comments: commentsIndexArray,
+    comments,
   } = card;
+
+  const filmHoursAmount = Math.floor(runTime / MINUTES_IN_HOUR);
+  const filmMinutesAmount = runTime - (MINUTES_IN_HOUR * Math.floor(runTime / MINUTES_IN_HOUR));
 
   const addGenreElement = () => {
     let genreName = '';
@@ -35,8 +38,7 @@ const createPopupTemplate = (card, comments) => {
   const addCommentElement = () => {
     let commentElement = '';
     for (let i = 0; i < comments.length; i++) {
-      if (commentsIndexArray.includes(comments[i].id)) {
-        commentElement = `${commentElement  }<li class="film-details__comment">
+      commentElement = `${commentElement}<li class="film-details__comment">
           <span class="film-details__comment-emoji">
             <img src="./images/emoji/${comments[i].emotion}.png" width="55" height="55" alt="emoji-smile">
           </span>
@@ -49,7 +51,6 @@ const createPopupTemplate = (card, comments) => {
             </p>
           </div>
         </li>`;
-      }
     }
     return commentElement;
   };
@@ -99,7 +100,7 @@ const createPopupTemplate = (card, comments) => {
                 </tr>
                 <tr class="film-details__row">
                   <td class="film-details__term">Runtime</td>
-                  <td class="film-details__cell">${Math.floor(runTime / MINUTES_IN_HOUR)}h ${runTime - (MINUTES_IN_HOUR * Math.floor(runTime / MINUTES_IN_HOUR))}m</td>
+                  <td class="film-details__cell">${filmHoursAmount}h ${filmMinutesAmount}m</td>
                 </tr>
                 <tr class="film-details__row">
                   <td class="film-details__term">Country</td>
@@ -128,7 +129,7 @@ const createPopupTemplate = (card, comments) => {
 
         <div class="film-details__bottom-container">
           <section class="film-details__comments-wrap">
-            <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${commentsIndexArray.length}</span></h3>
+            <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${comments.length}</span></h3>
 
             <ul class="film-details__comments-list">
               ${addCommentElement()}
@@ -171,13 +172,12 @@ const createPopupTemplate = (card, comments) => {
 };
 
 export default class PopupView {
-  constructor (card, comments) {
+  constructor (card) {
     this.card = card;
-    this.comments = comments;
   }
 
   getTemplate () {
-    return createPopupTemplate(this.card, this.comments);
+    return createPopupTemplate(this.card);
   }
 
   getElement () {
