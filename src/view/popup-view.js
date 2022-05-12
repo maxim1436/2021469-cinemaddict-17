@@ -172,23 +172,27 @@ const createPopupTemplate = (card) => {
 };
 
 export default class PopupView {
+  #card;
+  #element = null;
+
   constructor (card) {
-    this.card = card;
+    this.#card = card;
   }
 
-  getTemplate () {
-    return createPopupTemplate(this.card);
+  get template () {
+    return createPopupTemplate(this.#card);
   }
 
-  getElement () {
-    if(!this.element) {
-      this.element = createElement(this.getTemplate());
+  get element () {
+    if(!this.#element) {
+      this.#element = createElement(this.template);
     }
 
-    return this.element;
+    return this.#element;
   }
 
   removeElement () {
-    this.element = this.element.remove();
+    this.#element = this.#element.remove();
+    this.#element = null;
   }
 }

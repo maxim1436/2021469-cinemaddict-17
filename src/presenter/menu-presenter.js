@@ -15,38 +15,73 @@ const siteFooterElement = document.querySelector('.footer');
 const siteBodyElement = document.querySelector('body');
 
 export default class MenuPresenter {
+  #menuContainer = null;
+  #filmsData = null;
+  #movies = [];
+
   films = new FilmsView();
   filmsList = new FilmsListView();
-  filmsListContainer = this.filmsList.getElement().querySelector('div');
+  filmsListContainer = this.filmsList.element.querySelector('div');
   topRated = new TopRatedView();
-  topRatedFilmsContainer =this.topRated.getElement().querySelector('div');
+  topRatedFilmsContainer =this.topRated.element.querySelector('div');
   mostCommented = new MostCommentedView();
-  mostCommentedContainer = this.mostCommented.getElement().querySelector('div');
+  mostCommentedContainer = this.mostCommented.element.querySelector('div');
 
-  init = (menuContainer, data) => {
-    this.menuContainer = menuContainer;
-    this.data = data;
-    this.filmsData = this.data.getData();
+  #renderMovie = (movie) => {
+    const movieComponent = new FilmCardView(movie);
+    movieComponent.element.addEventListener('click', () => {
+      siteBodyElement.classList.add('hide-overflow');
 
-    render(new NavigationView(), this.menuContainer);
-    render(new SortView(), this.menuContainer);
-    render(this.films, this.menuContainer);
-    render(this.filmsList, this.films.getElement());
+      if(siteBodyElement.querySelector('.film-details')) {
+        siteBodyElement.querySelector('.film-details').remove();
+      }
 
-    for (let i = 0; i < this.filmsData.length; i++) {
-      render(new FilmCardView(this.filmsData[i]), this.filmsListContainer);
+      const popupMovie = new PopupView(movie);
+      render(popupMovie, siteBodyElement);
+
+      const onEscKeyDown = (evt) => {
+        if (evt.key === 'Escape' || evt.key === 'Esc') {
+          evt.preventDefault();
+          popupMovie.removeElement();
+          siteBodyElement.classList.remove('hide-overflow');
+          document.removeEventListener('keydown', onEscKeyDown);
+        }
+      };
+      document.addEventListener('keydown', onEscKeyDown);
+
+      popupMovie.element.querySelector('.film-details__close-btn').addEventListener('click', () => {
+        popupMovie.removeElement();
+        siteBodyElement.classList.remove('hide-overflow');
+        document.removeEventListener('keydown', onEscKeyDown);
+      });
+    });
+
+    render(movieComponent, this.filmsListContainer);
+  };
+
+  init = (menuContainer, filmsData) => {
+    this.#menuContainer = menuContainer;
+    this.#filmsData = filmsData;
+    this.#movies = this.#filmsData.movies;
+
+    render(new NavigationView(), this.#menuContainer);
+    render(new SortView(), this.#menuContainer);
+    render(this.films, this.#menuContainer);
+    render(this.filmsList, this.films.element);
+
+    for (let i = 0; i < this.#movies.length; i++) {
+      this.#renderMovie(this.#movies[i]);
     }
-    render(new ShowMoreButonView(), this.filmsList.getElement());
+    render(new ShowMoreButonView(), this.filmsList.element);
 
-    render(this.topRated, this.films.getElement());
-    render(new FilmCardView(this.filmsData[getRandomInteger(0, this.filmsData.length - 1)]), this.topRatedFilmsContainer);
-    render(new FilmCardView(this.filmsData[getRandomInteger(0, this.filmsData.length - 1)]), this.topRatedFilmsContainer);
+    render(this.topRated, this.films.element);
+    render(new FilmCardView(this.#movies[getRandomInteger(0, this.#movies.length - 1)]), this.topRatedFilmsContainer);
+    render(new FilmCardView(this.#movies[getRandomInteger(0, this.#movies.length - 1)]), this.topRatedFilmsContainer);
 
-    render(this.mostCommented, this.films.getElement());
-    render(new FilmCardView(this.filmsData[getRandomInteger(0, this.filmsData.length - 1)]), this.mostCommentedContainer);
-    render(new FilmCardView(this.filmsData[getRandomInteger(0, this.filmsData.length - 1)]), this.mostCommentedContainer);
+    render(this.mostCommented, this.films.element);
+    render(new FilmCardView(this.#movies[getRandomInteger(0, this.#movies.length - 1)]), this.mostCommentedContainer);
+    render(new FilmCardView(this.#movies[getRandomInteger(0, this.#movies.length - 1)]), this.mostCommentedContainer);
 
-    render(new PopupView(this.filmsData[getRandomInteger(0, this.filmsData.length - 1)]), siteBodyElement);
     render(new FilmCounterdView(), siteFooterElement);
   };
 }

@@ -8,19 +8,22 @@ const createFilmsListTemplate = () => (`
 `);
 
 export default class FilmsListView {
-  getTemplate () {
-    return createFilmsListTemplate;
+  #element = null;
+
+  get template () {
+    return createFilmsListTemplate();
   }
 
-  getElement () {
-    if(!this.element) {
-      this.element = createElement(this.getTemplate());
+  get element () {
+    if(!this.#element) {
+      this.#element = createElement(this.template);
     }
 
-    return this.element;
+    return this.#element;
   }
 
   removeElement () {
-    this.element = this.element.remove();
+    this.#element = this.#element.remove();
+    this.#element = null;
   }
 }

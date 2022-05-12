@@ -8,19 +8,22 @@ const createTopRatedTemplate = () => (`
 `);
 
 export default class TopRatedView {
-  getTemplate () {
-    return createTopRatedTemplate;
+  #element = null;
+
+  get template () {
+    return createTopRatedTemplate();
   }
 
-  getElement () {
-    if(!this.element) {
-      this.element = createElement(this.getTemplate());
+  get element () {
+    if(!this.#element) {
+      this.#element = createElement(this.template);
     }
 
-    return this.element;
+    return this.#element;
   }
 
   removeElement () {
-    this.element = this.element.remove();
+    this.#element = this.#element.remove();
+    this.#element = null;
   }
 }
