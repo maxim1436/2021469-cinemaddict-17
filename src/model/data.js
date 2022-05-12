@@ -4,8 +4,8 @@ import { generateComment } from '../moсk/comment';
 const FILMS_CARDS_AMOUNT = 5;
 const COMMENTS_AMOUNT = 100;
 
-export default class Data {
-  generateData = () => {
+export default class FilmModel {
+  generateMovies = () => {
     const films = Array.from({length: FILMS_CARDS_AMOUNT}, generateFilm);
     const comments = Array.from({length: COMMENTS_AMOUNT}, generateComment);
     films.forEach((film) => {
@@ -19,7 +19,9 @@ export default class Data {
     return films;
   };
 
-  data = this.generateData();
+  #movies = this.generateMovies();
 
-  getData = () => this.data;
+  get movies () {
+    return this.#movies;
+  }
 }
