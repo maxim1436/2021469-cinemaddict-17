@@ -24,6 +24,5 @@ export default class FilmsListView {
 
   removeElement () {
     this.#element = this.#element.remove();
-    this.#element = null;
   }
 }

@@ -23,6 +23,5 @@ export default class FilmCounterdView {
 
   removeElement () {
     this.#element = this.#element.remove();
-    this.#element = null;
   }
 }

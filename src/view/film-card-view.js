@@ -61,6 +61,5 @@ export default class FilmCardView {
 
   removeElement () {
     this.#element = this.#element.remove();
-    this.#element = null;
   }
 }

@@ -6,8 +6,9 @@ import FilmModel from './model/data.js';
 const siteHeaderElement = document.querySelector('.header');
 const siteMainElement = document.querySelector('.main');
 
-const menuPresenter = new MenuPresenter();
 const filmsData = new FilmModel();
+const menuPresenter = new MenuPresenter(filmsData);
+
 
 render(new RankUserView(), siteHeaderElement);
-menuPresenter.init(siteMainElement, filmsData);
+menuPresenter.init(siteMainElement);

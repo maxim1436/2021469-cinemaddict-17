@@ -25,6 +25,5 @@ export default class MostCommentedView {
 
   removeElement () {
     this.#element = this.#element.remove();
-    this.#element = null;
   }
 }

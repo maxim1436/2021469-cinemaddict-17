@@ -24,6 +24,5 @@ export default class RankUserView {
 
   removeElement () {
     this.#element = this.#element.remove();
-    this.#element = null;
   }
 }
