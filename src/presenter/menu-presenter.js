@@ -81,15 +81,15 @@ export default class MenuPresenter {
   init = (menuContainer) => {
     this.#menuContainer = menuContainer;
     this.#movies = this.#filmsData.movies;
-
     render(new NavigationView(), this.#menuContainer);
-    render(this.films, this.#menuContainer);
-    render(this.filmsList, this.films.element);
-
     if(this.#movies.length <= 0) {
+      render(this.films, this.#menuContainer);
+      render(this.filmsList, this.films.element);
       render(new NoFilmView(), this.filmsList.element);
     } else {
       render(new SortView(), this.#menuContainer);
+      render(this.films, this.#menuContainer);
+      render(this.filmsList, this.films.element);
 
       for (let i = 0; i < Math.min(this.#movies.length, FILMS_CARDS_PER_STEP); i++) {
         this.#renderMovie(this.#movies[i]);
