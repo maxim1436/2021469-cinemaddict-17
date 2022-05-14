@@ -22,8 +22,11 @@ export default class MenuPresenter {
   #movies = [];
   #showMoreButtonComponent = new ShowMoreButtonView();
   #renderedFilmCount = FILMS_CARDS_PER_STEP;
-  constructor (filmsData) {
+
+  constructor (menuContainer, filmsData) {
+    this.#menuContainer = menuContainer;
     this.#filmsData = filmsData;
+    this.#movies = this.#filmsData.movies;
   }
 
   films = new FilmsView();
@@ -78,35 +81,42 @@ export default class MenuPresenter {
     }
   };
 
-  init = (menuContainer) => {
-    this.#menuContainer = menuContainer;
-    this.#movies = this.#filmsData.movies;
+  #renderMenuWithNoMovies = () => {
+    render(this.films, this.#menuContainer);
+    render(this.filmsList, this.films.element);
+    render(new NoFilmView(), this.filmsList.element);
+  };
+
+  #renderMenuWithSomeMovies = () => {
+    render(new SortView(), this.#menuContainer);
+    render(this.films, this.#menuContainer);
+    render(this.filmsList, this.films.element);
+
+    for (let i = 0; i < Math.min(this.#movies.length, FILMS_CARDS_PER_STEP); i++) {
+      this.#renderMovie(this.#movies[i]);
+    }
+
+    if (this.#movies.length > FILMS_CARDS_PER_STEP) {
+      render(this.#showMoreButtonComponent, this.filmsList.element);
+      this.#showMoreButtonComponent.element.addEventListener('click', this.#handleShowMoreButtonClick);
+    }
+
+    render(this.topRated, this.films.element);
+    render(new FilmCardView(this.#movies[getRandomInteger(0, this.#movies.length - 1)]), this.topRatedFilmsContainer);
+    render(new FilmCardView(this.#movies[getRandomInteger(0, this.#movies.length - 1)]), this.topRatedFilmsContainer);
+
+    render(this.mostCommented, this.films.element);
+    render(new FilmCardView(this.#movies[getRandomInteger(0, this.#movies.length - 1)]), this.mostCommentedContainer);
+    render(new FilmCardView(this.#movies[getRandomInteger(0, this.#movies.length - 1)]), this.mostCommentedContainer);
+  };
+
+  init = () => {
+
     render(new NavigationView(), this.#menuContainer);
     if(this.#movies.length <= 0) {
-      render(this.films, this.#menuContainer);
-      render(this.filmsList, this.films.element);
-      render(new NoFilmView(), this.filmsList.element);
+      this.#renderMenuWithNoMovies();
     } else {
-      render(new SortView(), this.#menuContainer);
-      render(this.films, this.#menuContainer);
-      render(this.filmsList, this.films.element);
-
-      for (let i = 0; i < Math.min(this.#movies.length, FILMS_CARDS_PER_STEP); i++) {
-        this.#renderMovie(this.#movies[i]);
-      }
-
-      if (this.#movies.length > FILMS_CARDS_PER_STEP) {
-        render(this.#showMoreButtonComponent, this.filmsList.element);
-        this.#showMoreButtonComponent.element.addEventListener('click', this.#handleShowMoreButtonClick);
-      }
-
-      render(this.topRated, this.films.element);
-      render(new FilmCardView(this.#movies[getRandomInteger(0, this.#movies.length - 1)]), this.topRatedFilmsContainer);
-      render(new FilmCardView(this.#movies[getRandomInteger(0, this.#movies.length - 1)]), this.topRatedFilmsContainer);
-
-      render(this.mostCommented, this.films.element);
-      render(new FilmCardView(this.#movies[getRandomInteger(0, this.#movies.length - 1)]), this.mostCommentedContainer);
-      render(new FilmCardView(this.#movies[getRandomInteger(0, this.#movies.length - 1)]), this.mostCommentedContainer);
+      this.#renderMenuWithSomeMovies();
     }
 
     render(new FilmCounterdView(), siteFooterElement);
