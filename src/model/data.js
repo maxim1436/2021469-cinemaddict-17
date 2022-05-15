@@ -1,7 +1,7 @@
 import { generateFilm } from '../moсk/film';
 import { generateComment } from '../moсk/comment';
 
-const FILMS_CARDS_AMOUNT = 5;
+const FILMS_CARDS_AMOUNT = 20;
 const COMMENTS_AMOUNT = 100;
 
 export default class FilmModel {

@@ -24,6 +24,5 @@ export default class TopRatedView {
 
   removeElement () {
     this.#element = this.#element.remove();
-    this.#element = null;
   }
 }

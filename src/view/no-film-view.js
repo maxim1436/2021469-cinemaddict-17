@@ -1,14 +1,14 @@
 import { createElement } from '../render';
 
-const createFilmsTemplate = () => (`
-  <section class="films"></section>
+const createNoFilmTemplate = () => (`
+  <h2 class="films-list__title">There are no movies in our database</h2>
 `);
 
-export default class FilmsView {
+export default class NoFilmView {
   #element = null;
 
   get template () {
-    return createFilmsTemplate();
+    return createNoFilmTemplate();
   }
 
   get element () {

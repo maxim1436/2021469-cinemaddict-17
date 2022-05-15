@@ -3,14 +3,16 @@ import SortView from '../view/sort-view.js';
 import FilmsView from '../view/films-view.js';
 import FilmsListView from '../view/films-list-view.js';
 import FilmCardView from '../view/film-card-view.js';
-import ShowMoreButonView from '../view/show-more-button-view.js';
+import ShowMoreButtonView from '../view/show-more-button-view.js';
 import PopupView from '../view/popup-view.js';
 import FilmCounterdView from '../view/film-counter-view.js';
 import TopRatedView from '../view/top-rated-view.js';
 import MostCommentedView from '../view/most-commented-view.js';
 import {render} from '../render.js';
 import { getRandomInteger } from '../utils.js';
+import NoFilmView from '../view/no-film-view.js';
 
+const FILMS_CARDS_PER_STEP = 5;
 const siteFooterElement = document.querySelector('.footer');
 const siteBodyElement = document.querySelector('body');
 
@@ -18,6 +20,14 @@ export default class MenuPresenter {
   #menuContainer = null;
   #filmsData = null;
   #movies = [];
+  #showMoreButtonComponent = new ShowMoreButtonView();
+  #renderedFilmCount = FILMS_CARDS_PER_STEP;
+
+  constructor (menuContainer, filmsData) {
+    this.#menuContainer = menuContainer;
+    this.#filmsData = filmsData;
+    this.#movies = this.#filmsData.movies;
+  }
 
   films = new FilmsView();
   filmsList = new FilmsListView();
@@ -59,20 +69,37 @@ export default class MenuPresenter {
     render(movieComponent, this.filmsListContainer);
   };
 
-  init = (menuContainer, filmsData) => {
-    this.#menuContainer = menuContainer;
-    this.#filmsData = filmsData;
-    this.#movies = this.#filmsData.movies;
+  #handleShowMoreButtonClick = (evt) => {
+    evt.preventDefault();
+    this.#movies
+      .slice(this.#renderedFilmCount, this.#renderedFilmCount + FILMS_CARDS_PER_STEP)
+      .forEach((movie) => this.#renderMovie(movie));
 
-    render(new NavigationView(), this.#menuContainer);
+    this.#renderedFilmCount += FILMS_CARDS_PER_STEP;
+    if(this.#renderedFilmCount >= this.#movies.length) {
+      this.#showMoreButtonComponent.removeElement();
+    }
+  };
+
+  #renderMenuWithNoMovies = () => {
+    render(this.films, this.#menuContainer);
+    render(this.filmsList, this.films.element);
+    render(new NoFilmView(), this.filmsList.element);
+  };
+
+  #renderMenuWithSomeMovies = () => {
     render(new SortView(), this.#menuContainer);
     render(this.films, this.#menuContainer);
     render(this.filmsList, this.films.element);
 
-    for (let i = 0; i < this.#movies.length; i++) {
+    for (let i = 0; i < Math.min(this.#movies.length, FILMS_CARDS_PER_STEP); i++) {
       this.#renderMovie(this.#movies[i]);
     }
-    render(new ShowMoreButonView(), this.filmsList.element);
+
+    if (this.#movies.length > FILMS_CARDS_PER_STEP) {
+      render(this.#showMoreButtonComponent, this.filmsList.element);
+      this.#showMoreButtonComponent.element.addEventListener('click', this.#handleShowMoreButtonClick);
+    }
 
     render(this.topRated, this.films.element);
     render(new FilmCardView(this.#movies[getRandomInteger(0, this.#movies.length - 1)]), this.topRatedFilmsContainer);
@@ -81,6 +108,16 @@ export default class MenuPresenter {
     render(this.mostCommented, this.films.element);
     render(new FilmCardView(this.#movies[getRandomInteger(0, this.#movies.length - 1)]), this.mostCommentedContainer);
     render(new FilmCardView(this.#movies[getRandomInteger(0, this.#movies.length - 1)]), this.mostCommentedContainer);
+  };
+
+  init = () => {
+
+    render(new NavigationView(), this.#menuContainer);
+    if(this.#movies.length <= 0) {
+      this.#renderMenuWithNoMovies();
+    } else {
+      this.#renderMenuWithSomeMovies();
+    }
 
     render(new FilmCounterdView(), siteFooterElement);
   };
