@@ -1,7 +1,8 @@
-import { createElement } from '../render';
 import { humanizeFilmReleaseDate, humanizeCommentReleaseDate } from '../utils';
+import AbstractView from '../framework/view/abstract-view';
 
 const MINUTES_IN_HOUR = 60;
+// const siteBodyElement = document.querySelector('body');
 
 const createPopupTemplate = (card) => {
   const {
@@ -171,11 +172,11 @@ const createPopupTemplate = (card) => {
   `);
 };
 
-export default class PopupView {
+export default class PopupView extends AbstractView{
   #card;
-  #element = null;
 
   constructor (card) {
+    super();
     this.#card = card;
   }
 
@@ -183,15 +184,14 @@ export default class PopupView {
     return createPopupTemplate(this.#card);
   }
 
-  get element () {
-    if(!this.#element) {
-      this.#element = createElement(this.template);
-    }
+  setClickHandler = (callback) => {
+    this._callback.click = callback;
+    this.element.querySelector('.film-details__close-btn').addEventListener('click', this.#closePopupClickHandler);
+  };
 
-    return this.#element;
-  }
+  #closePopupClickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.click();
+  };
 
-  removeElement () {
-    this.#element = this.#element.remove();
-  }
 }

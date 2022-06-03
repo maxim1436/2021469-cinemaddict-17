@@ -8,7 +8,7 @@ import PopupView from '../view/popup-view.js';
 import FilmCounterdView from '../view/film-counter-view.js';
 import TopRatedView from '../view/top-rated-view.js';
 import MostCommentedView from '../view/most-commented-view.js';
-import {render} from '../render.js';
+import { render } from '../framework/render.js';
 import { getRandomInteger } from '../utils.js';
 import NoFilmView from '../view/no-film-view.js';
 
@@ -37,47 +37,46 @@ export default class MenuPresenter {
   mostCommented = new MostCommentedView();
   mostCommentedContainer = this.mostCommented.element.querySelector('div');
 
-  #renderMovie = (movie) => {
-    const movieComponent = new FilmCardView(movie);
-    movieComponent.element.addEventListener('click', () => {
-      siteBodyElement.classList.add('hide-overflow');
+  #hadleOpenPopupClick = (movie) => {
+    siteBodyElement.classList.add('hide-overflow');
 
-      if(siteBodyElement.querySelector('.film-details')) {
-        siteBodyElement.querySelector('.film-details').remove();
-      }
+    if(siteBodyElement.querySelector('.film-details')) {
+      siteBodyElement.querySelector('.film-details').remove();
+    }
+    const popupMovie = new PopupView(movie);
+    render(popupMovie, siteBodyElement);
 
-      const popupMovie = new PopupView(movie);
-      render(popupMovie, siteBodyElement);
+    const closePopupClickHandler = () => {
+      popupMovie.element.remove();
+      siteBodyElement.classList.remove('hide-overflow');
+    };
 
-      const onEscKeyDown = (evt) => {
-        if (evt.key === 'Escape' || evt.key === 'Esc') {
-          evt.preventDefault();
-          popupMovie.removeElement();
-          siteBodyElement.classList.remove('hide-overflow');
-          document.removeEventListener('keydown', onEscKeyDown);
-        }
-      };
-      document.addEventListener('keydown', onEscKeyDown);
-
-      popupMovie.element.querySelector('.film-details__close-btn').addEventListener('click', () => {
-        popupMovie.removeElement();
+    const onEscKeyDown = (evt) => {
+      if (evt.key === 'Escape' || evt.key === 'Esc') {
+        evt.preventDefault();
+        popupMovie.element.remove();
         siteBodyElement.classList.remove('hide-overflow');
         document.removeEventListener('keydown', onEscKeyDown);
-      });
-    });
+      }
+    };
+    document.addEventListener('keydown', onEscKeyDown);
+    popupMovie.setClickHandler(closePopupClickHandler);
+  };
 
+  #renderMovie = (movie) => {
+    const movieComponent = new FilmCardView(movie);
+    movieComponent.setClickHandler(this.#hadleOpenPopupClick, movie);
     render(movieComponent, this.filmsListContainer);
   };
 
-  #handleShowMoreButtonClick = (evt) => {
-    evt.preventDefault();
+  #handleShowMoreButtonClick = () => {
     this.#movies
       .slice(this.#renderedFilmCount, this.#renderedFilmCount + FILMS_CARDS_PER_STEP)
       .forEach((movie) => this.#renderMovie(movie));
 
     this.#renderedFilmCount += FILMS_CARDS_PER_STEP;
     if(this.#renderedFilmCount >= this.#movies.length) {
-      this.#showMoreButtonComponent.removeElement();
+      this.#showMoreButtonComponent.element.remove();
     }
   };
 
@@ -98,7 +97,7 @@ export default class MenuPresenter {
 
     if (this.#movies.length > FILMS_CARDS_PER_STEP) {
       render(this.#showMoreButtonComponent, this.filmsList.element);
-      this.#showMoreButtonComponent.element.addEventListener('click', this.#handleShowMoreButtonClick);
+      this.#showMoreButtonComponent.setClickHandler(this.#handleShowMoreButtonClick);
     }
 
     render(this.topRated, this.films.element);

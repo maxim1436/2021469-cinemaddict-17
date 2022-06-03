@@ -1,4 +1,4 @@
-import { createElement } from '../render';
+import AbstractView from '../framework/view/abstract-view';
 
 const createFilmCounterTemplate = () => (`
   <section class="footer__statistics">
@@ -6,22 +6,8 @@ const createFilmCounterTemplate = () => (`
   </section>
 `);
 
-export default class FilmCounterdView {
-  #element = null;
-
+export default class FilmCounterdView extends AbstractView {
   get template () {
     return createFilmCounterTemplate();
-  }
-
-  get element () {
-    if(!this.#element) {
-      this.#element = createElement(this.template);
-    }
-
-    return this.#element;
-  }
-
-  removeElement () {
-    this.#element = this.#element.remove();
   }
 }
