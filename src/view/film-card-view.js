@@ -1,4 +1,4 @@
-import { createElement } from '../render';
+import AbstractView from '../framework/view/abstract-view';
 
 const MINUTES_IN_HOUR = 60;
 
@@ -39,11 +39,11 @@ const createFilmCardTemplate = (card) => {
   `);
 };
 
-export default class FilmCardView {
+export default class FilmCardView extends AbstractView{
   #card;
-  #element = null;
 
   constructor (card) {
+    super();
     this.#card = card;
   }
 
@@ -51,15 +51,13 @@ export default class FilmCardView {
     return createFilmCardTemplate(this.#card);
   }
 
-  get element () {
-    if(!this.#element) {
-      this.#element = createElement(this.template);
-    }
+  setClickHandler = (callback, movie) => {
+    this._callback.click = callback;
+    this.element.addEventListener('click', this.#openPopupClickHandler(movie));
+  };
 
-    return this.#element;
-  }
-
-  removeElement () {
-    this.#element = this.#element.remove();
-  }
+  #openPopupClickHandler = (movie) => (evt) => {
+    evt.preventDefault();
+    this._callback.click(movie);
+  };
 }

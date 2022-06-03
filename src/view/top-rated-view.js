@@ -1,4 +1,4 @@
-import { createElement } from '../render';
+import AbstractView from '../framework/view/abstract-view';
 
 const createTopRatedTemplate = () => (`
   <section class="films-list films-list--extra">
@@ -7,22 +7,8 @@ const createTopRatedTemplate = () => (`
   </section>
 `);
 
-export default class TopRatedView {
-  #element = null;
-
+export default class TopRatedView extends AbstractView{
   get template () {
     return createTopRatedTemplate();
-  }
-
-  get element () {
-    if(!this.#element) {
-      this.#element = createElement(this.template);
-    }
-
-    return this.#element;
-  }
-
-  removeElement () {
-    this.#element = this.#element.remove();
   }
 }
