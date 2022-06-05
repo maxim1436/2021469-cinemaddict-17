@@ -2,7 +2,6 @@ import { humanizeFilmReleaseDate, humanizeCommentReleaseDate } from '../utils';
 import AbstractView from '../framework/view/abstract-view';
 
 const MINUTES_IN_HOUR = 60;
-// const siteBodyElement = document.querySelector('body');
 
 const createPopupTemplate = (card) => {
   const {

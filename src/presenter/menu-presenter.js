@@ -20,6 +20,7 @@ export default class MenuPresenter {
   #menuContainer = null;
   #filmsData = null;
   #movies = [];
+  #userDetails = {};
   #showMoreButtonComponent = new ShowMoreButtonView();
   #renderedFilmCount = FILMS_CARDS_PER_STEP;
 
@@ -27,6 +28,7 @@ export default class MenuPresenter {
     this.#menuContainer = menuContainer;
     this.#filmsData = filmsData;
     this.#movies = this.#filmsData.movies;
+    this.#userDetails = this.#filmsData.userDetails;
   }
 
   films = new FilmsView();
@@ -46,7 +48,7 @@ export default class MenuPresenter {
     const popupMovie = new PopupView(movie);
     render(popupMovie, siteBodyElement);
 
-    const closePopupClickHandler = () => {
+    const handleClosePopupClick = () => {
       popupMovie.element.remove();
       siteBodyElement.classList.remove('hide-overflow');
     };
@@ -60,7 +62,7 @@ export default class MenuPresenter {
       }
     };
     document.addEventListener('keydown', onEscKeyDown);
-    popupMovie.setClickHandler(closePopupClickHandler);
+    popupMovie.setClickHandler(handleClosePopupClick);
   };
 
   #renderMovie = (movie) => {
@@ -111,13 +113,13 @@ export default class MenuPresenter {
 
   init = () => {
 
-    render(new NavigationView(), this.#menuContainer);
+    render(new NavigationView(this.#userDetails), this.#menuContainer);
     if(this.#movies.length <= 0) {
       this.#renderMenuWithNoMovies();
     } else {
       this.#renderMenuWithSomeMovies();
     }
 
-    render(new FilmCounterdView(), siteFooterElement);
+    render(new FilmCounterdView(this.#movies.length), siteFooterElement);
   };
 }

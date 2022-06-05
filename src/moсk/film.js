@@ -26,6 +26,11 @@ const FILM_DESCRIPTIONS = [
   'Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante.'
 ];
 
+const TRUE_OR_FALSE = [
+  true,
+  false
+];
+
 export const generateFilm = () => {
   const FilmsIndexArray = [];
   const commentsIndexArray = [];
@@ -61,10 +66,10 @@ export const generateFilm = () => {
       'description': `${getRandomElementOfArray(FILM_DESCRIPTIONS)}`
     },
     'userDetails': {
-      'watchlist': false,
-      'alreadyWatched': true,
+      'watchlist': getRandomElementOfArray(TRUE_OR_FALSE),
+      'alreadyWatched': getRandomElementOfArray(TRUE_OR_FALSE),
       'watchingDate': '2019-04-12T16:12:32.554Z',
-      'favorite': false
+      'favorite': getRandomElementOfArray(TRUE_OR_FALSE)
     }
   };
 };

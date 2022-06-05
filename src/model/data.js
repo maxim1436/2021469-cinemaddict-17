@@ -1,11 +1,15 @@
 import { generateFilm } from '../moсk/film';
 import { generateComment } from '../moсk/comment';
 
-const FILMS_CARDS_AMOUNT = 20;
+const FILMS_CARDS_AMOUNT = 30;
 const COMMENTS_AMOUNT = 100;
 
 export default class FilmModel {
+
   generateMovies = () => {
+    let watchListCounter = 0;
+    let alreadyWatchedCounter = 0;
+    let favoriteFilmsCounter = 0;
     const films = Array.from({length: FILMS_CARDS_AMOUNT}, generateFilm);
     const comments = Array.from({length: COMMENTS_AMOUNT}, generateComment);
     films.forEach((film) => {
@@ -15,13 +19,33 @@ export default class FilmModel {
         }
       }
       film.comments.splice(0, film.comments.length / 2);
+
+      if (film.userDetails.watchlist) {
+        watchListCounter++;
+      }
+
+      if (film.userDetails.alreadyWatched) {
+        alreadyWatchedCounter++;
+      }
+
+      if (film.userDetails.favorite) {
+        favoriteFilmsCounter++;
+      }
+
     });
-    return films;
+    return {
+      movies: films,
+      userDetails:{
+        watchList: watchListCounter,
+        alreadyWatched: alreadyWatchedCounter,
+        favoriteFilms: favoriteFilmsCounter,
+      },
+    };
   };
 
-  #movies = this.generateMovies();
+  #moviesData = this.generateMovies();
 
-  get movies () {
-    return this.#movies;
+  get moviesData () {
+    return this.#moviesData;
   }
 }
