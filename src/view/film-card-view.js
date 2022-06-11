@@ -12,10 +12,51 @@ const createFilmCardTemplate = (card) => {
       description,
       genre,
     },
-    comments
+    comments,
+    userDetails: {
+      watchlist,
+      alreadyWatched,
+      favorite,
+    }
   } = card;
   const filmHoursAmount = Math.floor(runTime / MINUTES_IN_HOUR);
   const filmMinutesAmount = runTime - (MINUTES_IN_HOUR * Math.floor(runTime / MINUTES_IN_HOUR));
+
+  const addControlButtons = () => {
+    let controlButtons = '';
+
+    if (watchlist) {
+      controlButtons = `${controlButtons}
+      <button class="film-card__controls-item film-card__controls-item--add-to-watchlist film-card__controls-item--active" type="button">Add to watchlist</button>
+      `;
+    } else {
+      controlButtons = `${controlButtons}
+        <button class="film-card__controls-item film-card__controls-item--add-to-watchlist" type="button">Add to watchlist</button>
+      `;
+    }
+
+    if (alreadyWatched) {
+      controlButtons = `${controlButtons}
+        <button class="film-card__controls-item film-card__controls-item--mark-as-watched film-card__controls-item--active" type="button">Mark as watched</button>
+      `;
+    } else {
+      controlButtons = `${controlButtons}
+        <button class="film-card__controls-item film-card__controls-item--mark-as-watched" type="button">Mark as watched</button>
+      `;
+    }
+
+    if (favorite) {
+      controlButtons = `${controlButtons}
+        <button class="film-card__controls-item film-card__controls-item--favorite film-card__controls-item--active" type="button">Mark as favorite</button>
+      `;
+    } else {
+      controlButtons = `${controlButtons}
+        <button class="film-card__controls-item film-card__controls-item--favorite" type="button">Mark as favorite</button>
+      `;
+    }
+    return controlButtons;
+  };
+
   return (`
     <article class="film-card">
     <a class="film-card__link">
@@ -31,9 +72,7 @@ const createFilmCardTemplate = (card) => {
       <span class="film-card__comments">${comments.length} comments</span>
     </a>
     <div class="film-card__controls">
-      <button class="film-card__controls-item film-card__controls-item--add-to-watchlist" type="button">Add to watchlist</button>
-      <button class="film-card__controls-item film-card__controls-item--mark-as-watched" type="button">Mark as watched</button>
-      <button class="film-card__controls-item film-card__controls-item--favorite" type="button">Mark as favorite</button>
+      ${addControlButtons()}
     </div>
     </article>
   `);
@@ -51,13 +90,44 @@ export default class FilmCardView extends AbstractView{
     return createFilmCardTemplate(this.#card);
   }
 
-  setClickHandler = (callback, movie) => {
+  setOpenPopupClickHandler = (callback, movie) => {
     this._callback.click = callback;
-    return (this.element.addEventListener('click', this.#CardMovieClickHandler(movie)));
+    return (this.element.querySelector('.film-card__link').addEventListener('click', this.#cardMovieClickHandler(movie)));
   };
 
-  #CardMovieClickHandler = (movie) => (evt) => {
+  #cardMovieClickHandler = (movie) => (evt) => {
     evt.preventDefault();
     this._callback.click(movie);
   };
+
+  setFavoriteClickHandler = (callback) => {
+    this._callback.favoriteClick = callback;
+    return this.element.querySelector('.film-card__controls-item--favorite').addEventListener('click', this.#FavoriteClickHandler);
+  };
+
+  #FavoriteClickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.favoriteClick(this.element);
+  };
+
+  setWatchlistClickHandler = (callback) => {
+    this._callback.watchlistClick = callback;
+    return this.element.querySelector('.film-card__controls-item--add-to-watchlist').addEventListener('click', this.#watchlistClickHadler);
+  };
+
+  #watchlistClickHadler = (evt) => {
+    evt.preventDefault();
+    this._callback.watchlistClick(this.element);
+  };
+
+  setAlreadyWatchedClickHandler = (callback) => {
+    this._callback.alreadyWatchedClick = callback;
+    return this.element.querySelector('.film-card__controls-item--mark-as-watched').addEventListener('click', this.#alreadyWatchedClickHandler);
+  };
+
+  #alreadyWatchedClickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.alreadyWatchedClick(this.element);
+  };
+
 }
