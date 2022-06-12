@@ -1,4 +1,5 @@
 import {getRandomInteger, getRandomFraction, getNonRepeatingNumber, getRandomElementOfArray} from '../utils';
+import { nanoid } from 'nanoid';
 
 const FILM_TITLES = [
   'Побег из Шоушенка',
@@ -32,14 +33,13 @@ const TRUE_OR_FALSE = [
 ];
 
 export const generateFilm = () => {
-  const FilmsIndexArray = [];
   const commentsIndexArray = [];
 
   for(let i = 0; i < getRandomInteger(0, 10); i++) {
     getNonRepeatingNumber(commentsIndexArray, 0, 20);
   }
   return {
-    'id': `${getNonRepeatingNumber(FilmsIndexArray,0, 5)}`,
+    'id': `${nanoid()}`,
     'comments': commentsIndexArray.map(String),
     'filmInfo': {
       'title': getRandomElementOfArray(FILM_TITLES),

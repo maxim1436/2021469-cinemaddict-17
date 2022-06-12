@@ -7,9 +7,9 @@ const COMMENTS_AMOUNT = 100;
 export default class FilmModel {
 
   generateMovies = () => {
-    let watchListCounter = 0;
-    let alreadyWatchedCounter = 0;
-    let favoriteFilmsCounter = 0;
+    const watchListFilms = [];
+    const alreadyWatchedFilms = [];
+    const favoriteFilms = [];
     const films = Array.from({length: FILMS_CARDS_AMOUNT}, generateFilm);
     const comments = Array.from({length: COMMENTS_AMOUNT}, generateComment);
     films.forEach((film) => {
@@ -21,24 +21,24 @@ export default class FilmModel {
       film.comments.splice(0, film.comments.length / 2);
 
       if (film.userDetails.watchlist) {
-        watchListCounter++;
+        watchListFilms.push(film.id);
       }
 
       if (film.userDetails.alreadyWatched) {
-        alreadyWatchedCounter++;
+        alreadyWatchedFilms.push(film.id);
       }
 
       if (film.userDetails.favorite) {
-        favoriteFilmsCounter++;
+        favoriteFilms.push(film.id);
       }
 
     });
     return {
       movies: films,
       userDetails:{
-        watchList: watchListCounter,
-        alreadyWatched: alreadyWatchedCounter,
-        favoriteFilms: favoriteFilmsCounter,
+        watchlist: watchListFilms,
+        alreadyWatched: alreadyWatchedFilms,
+        favoriteFilms: favoriteFilms,
       },
     };
   };
@@ -47,5 +47,9 @@ export default class FilmModel {
 
   get moviesData () {
     return this.#moviesData;
+  }
+
+  set moviesData (newData) {
+    this.#moviesData = newData;
   }
 }
