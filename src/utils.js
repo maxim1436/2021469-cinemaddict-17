@@ -1,5 +1,11 @@
 import dayjs from 'dayjs';
 
+export const SortType = {
+  DEFAULT: 'default',
+  BY_DATE: 'by-date',
+  BY_RATING: 'by-rating',
+};
+
 export const humanizeFilmReleaseDate = (date) => dayjs(date).format('D MMMM YYYY');
 export const humanizeCommentReleaseDate = (date) => dayjs(date).format('YYYY/M/D HH:mm');
 
@@ -45,4 +51,55 @@ export const updateItem = (items, update) => {
     update,
     ...items.slice(index + 1),
   ];
+};
+
+const getWeightForNullDate = (dateA, dateB) => {
+  if (dateA === null && dateB === null) {
+    return 0;
+  }
+
+  if (dateA === null) {
+    return 1;
+  }
+
+  if (dateB === null) {
+    return -1;
+  }
+
+  return null;
+};
+
+export const sortMoviesDateDown = (movieA, movieB) => {
+  const weight = getWeightForNullDate(movieA.filmInfo.release.date, movieB.filmInfo.release.date);
+  const differenceInYear = dayjs(movieB.filmInfo.release.date).diff(dayjs(movieA.filmInfo.release.date), 'year');
+  const differenceInMonth = dayjs(movieB.filmInfo.release.date).diff(dayjs(movieA.filmInfo.release.date), 'month');
+
+  if (differenceInYear !== 0) {
+    return weight ?? differenceInYear;
+  }
+
+  if (differenceInYear === 0 && differenceInMonth !== 0) {
+    return weight ?? differenceInMonth;
+  }
+
+  if (differenceInYear === 0 && differenceInMonth === 0)  {
+    return weight ?? dayjs(movieB.filmInfo.release.date).diff(dayjs(movieA.filmInfo.release.date), 'day');
+  }
+
+
+};
+
+export const sortMoviesRatingDown = (movieA, movieB) => {
+  if (movieB.filmInfo.totalRating > movieA.filmInfo.totalRating) {
+    return 1;
+  }
+
+  if (movieA.filmInfo.totalRating === movieB.filmInfo.totalRating) {
+    return 0;
+  }
+
+  if (movieB.filmInfo.totalRating < movieA.filmInfo.totalRating) {
+    return -1;
+  }
+
 };

@@ -55,7 +55,7 @@ export const generateFilm = () => {
         'Morgan Freeman'
       ],
       'release': {
-        'date': '2019-05-11T00:00:00.000Z',
+        'date': `${getRandomInteger(1950, 1999)}-0${getRandomInteger(1, 9)}-${getRandomInteger(10, 31)}T00:00:00.000Z`,
         'releaseCountry': 'Finland'
       },
       'runTime': getRandomInteger (20, 120),
@@ -68,7 +68,7 @@ export const generateFilm = () => {
     'userDetails': {
       'watchlist': getRandomElementOfArray(TRUE_OR_FALSE),
       'alreadyWatched': getRandomElementOfArray(TRUE_OR_FALSE),
-      'watchingDate': '2019-04-12T16:12:32.554Z',
+      'watchingDate': `${getRandomInteger(2000, 2022)}-0${getRandomInteger(1, 9)}-${getRandomInteger(10, 31)}T16:12:32.554Z`,
       'favorite': getRandomElementOfArray(TRUE_OR_FALSE)
     }
   };

@@ -107,6 +107,10 @@ export default class MoviePresenter {
     this.#changeData(this.#movie, propertyBeforeUpdate);
   };
 
+  destroy = () => {
+    remove(this.#movieComponent);
+  };
+
   init = (movie) => {
     this.#movie = movie;
     const prevMovieComponent = this.#movieComponent;
