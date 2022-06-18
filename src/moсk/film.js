@@ -55,7 +55,7 @@ export const generateFilm = () => {
         'Morgan Freeman'
       ],
       'release': {
-        'date': `${getRandomInteger(1950, 1999)}-0${getRandomInteger(1, 9)}-${getRandomInteger(10, 31)}T00:00:00.000Z`,
+        'date': `${new Date(getRandomInteger(1, 10000) * getRandomInteger(1, 10000) * getRandomInteger(1, 10000)).toISOString()}`,
         'releaseCountry': 'Finland'
       },
       'runTime': getRandomInteger (20, 120),

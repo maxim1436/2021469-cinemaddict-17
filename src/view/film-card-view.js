@@ -1,4 +1,5 @@
 import AbstractView from '../framework/view/abstract-view';
+import dayjs from 'dayjs';
 
 const MINUTES_IN_HOUR = 60;
 
@@ -11,6 +12,9 @@ const createFilmCardTemplate = (card) => {
       poster,
       description,
       genre,
+      release: {
+        date,
+      }
     },
     comments,
     userDetails: {
@@ -63,7 +67,7 @@ const createFilmCardTemplate = (card) => {
       <h3 class="film-card__title">${title}</h3>
       <p class="film-card__rating">${totalRating}</p>
       <p class="film-card__info">
-        <span class="film-card__year">1929</span>
+        <span class="film-card__year">${dayjs(date).format('YYYY')}</span>
         <span class="film-card__duration">${filmHoursAmount}h ${filmMinutesAmount}m</span>
         <span class="film-card__genre">${genre.join(', ')}</span>
       </p>

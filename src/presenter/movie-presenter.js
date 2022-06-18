@@ -16,20 +16,10 @@ export default class MoviePresenter {
     this.#closePrevOpenedPopup = closePrevOpenedPopup;
   }
 
-  #handleClosePopupClick = (popupMovieElement) => {
+  #handleClosePopup = (popupMovieElement) => {
     popupMovieElement.remove();
     this.siteBodyElement.classList.remove('hide-overflow');
     this.init(this.#movie);
-  };
-
-  #onEscKeyDown = (element) => (evt) => {
-    if (evt.key === 'Escape' || evt.key === 'Esc') {
-      evt.preventDefault();
-      element.remove();
-      this.siteBodyElement.classList.remove('hide-overflow');
-      this.init(this.#movie);
-      document.removeEventListener('keydown', this.#onEscKeyDown);
-    }
   };
 
   #hadleOpenPopupClick = (movie) => {
@@ -40,8 +30,8 @@ export default class MoviePresenter {
     const popupMovie = new PopupView(movie);
     render(popupMovie, this.siteBodyElement);
 
-    document.addEventListener('keydown', this.#onEscKeyDown(popupMovie.element));
-    popupMovie.setClickHandler(this.#handleClosePopupClick, popupMovie.element);
+    popupMovie.setClosePopupKeydownHandler(this.#handleClosePopup);
+    popupMovie.setClosePopupClickHandler(this.#handleClosePopup);
     popupMovie.setFavoriteClickHandler(this.#handleFavoriteButtonClick);
     popupMovie.setWatchlistClickHandler(this.#handleWatchlistButtonClick);
     popupMovie.setAlreadyWatchedClickHandler(this.#handleAlreadyWatchedButtonClick);
