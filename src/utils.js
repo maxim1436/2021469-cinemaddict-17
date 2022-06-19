@@ -89,17 +89,4 @@ export const sortMoviesDateDown = (movieA, movieB) => {
 
 };
 
-export const sortMoviesRatingDown = (movieA, movieB) => {
-  if (movieB.filmInfo.totalRating > movieA.filmInfo.totalRating) {
-    return 1;
-  }
-
-  if (movieA.filmInfo.totalRating === movieB.filmInfo.totalRating) {
-    return 0;
-  }
-
-  if (movieB.filmInfo.totalRating < movieA.filmInfo.totalRating) {
-    return -1;
-  }
-
-};
+export const sortMoviesRatingDown = (movieA, movieB) => movieB.filmInfo.totalRating - movieA.filmInfo.totalRating;
