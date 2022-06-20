@@ -7,7 +7,7 @@ import FilmCounterdView from '../view/film-counter-view.js';
 import TopRatedView from '../view/top-rated-view.js';
 import MostCommentedView from '../view/most-commented-view.js';
 import { render } from '../framework/render.js';
-import { getRandomInteger, updateItem, SortType, sortMoviesDateDown, sortMoviesRatingDown } from '../utils.js';
+import { getRandomInteger, updateItem, SortType, sortMoviesDateDown, sortMoviesRatingDown, FilterType } from '../utils.js';
 import NoFilmView from '../view/no-film-view.js';
 import MoviePresenter from './movie-presenter.js';
 
@@ -17,10 +17,11 @@ const siteBodyElement = document.querySelector('body');
 
 export default class MenuPresenter {
   #menuContainer = null;
-  #filmsData = null;
+  #filmsModel = null;
   #movies = [];
   #sourcedMovies = [];
   #currentSortType = SortType.DEFAULT;
+  #currentFilterType = FilterType.DEFAULT;
   #userDetails = {};
   #showMoreButtonComponent = new ShowMoreButtonView();
   #renderedFilmCount = FILMS_CARDS_PER_STEP;
@@ -30,9 +31,9 @@ export default class MenuPresenter {
 
   constructor (menuContainer, filmsData) {
     this.#menuContainer = menuContainer;
-    this.#filmsData = filmsData;
-    this.#movies = this.#filmsData.movies;
-    this.#userDetails = this.#filmsData.userDetails;
+    this.#filmsModel = filmsData;
+    this.#movies = this.#filmsModel.moviesData.movies;
+    this.#userDetails = this.#filmsModel.moviesData.userDetails;
   }
 
   films = new FilmsView();
@@ -42,6 +43,10 @@ export default class MenuPresenter {
   topRatedFilmsContainer =this.topRated.element.querySelector('div');
   mostCommented = new MostCommentedView();
   mostCommentedContainer = this.mostCommented.element.querySelector('div');
+
+  get movies() {
+    return this.#filmsModel.moviesData.movies;
+  }
 
   #handleMovieChange = (updatedMovie, propertyBeforeUpdate) => {
     this.#movies = updateItem(this.#movies, updatedMovie);
@@ -83,6 +88,43 @@ export default class MenuPresenter {
         this.#navigationPresenter.init(this.#userDetails);
       }
     }
+  };
+
+  #filterMovies = (filterType) => {
+    this.#movies = [...this.#sourcedMovies];
+    switch (filterType) {
+      case FilterType.WATCHLIST:
+        this.#movies = this.#movies.filter((movie) => movie.userDetails.watchlist === true);
+        break;
+      case FilterType.HISTORY:
+        this.#movies = this.#movies.filter((movie) => movie.userDetails.alreadyWatched === true);
+        break;
+      case FilterType.FAVORITES:
+        this.#movies = this.#movies.filter((movie) => movie.userDetails.favorite === true);
+        break;
+    }
+
+    this.#currentFilterType = filterType;
+  };
+
+  #handleFilterTypeChange = (filterType) => {
+    if (this.#currentFilterType === filterType) {
+      return;
+    }
+    this.#filterMovies(filterType);
+    this.#clearFilmsListContainer();
+    for (let i = 0; i < Math.min(this.#movies.length, FILMS_CARDS_PER_STEP); i++) {
+      this.#renderMovie(this.#movies[i], this.filmsListContainer);
+    }
+    this.#renderMovie(this.#movies[getRandomInteger(0, this.#movies.length - 1)], this.topRatedFilmsContainer);
+    this.#renderMovie(this.#movies[getRandomInteger(0, this.#movies.length - 1)], this.topRatedFilmsContainer);
+    this.#renderMovie(this.#movies[getRandomInteger(0, this.#movies.length - 1)], this.mostCommentedContainer);
+    this.#renderMovie(this.#movies[getRandomInteger(0, this.#movies.length - 1)], this.mostCommentedContainer);
+  };
+
+  #renderFilter = () => {
+    this.#navigationPresenter = new NavigationPresenter(this.#menuContainer, this.#handleFilterTypeChange);
+    this.#navigationPresenter.init(this.#userDetails);
   };
 
   #sortMovies = (sortType) => {
@@ -182,9 +224,8 @@ export default class MenuPresenter {
   };
 
   init = () => {
-    this.#sourcedMovies = [...this.#filmsData.movies];
-    this.#navigationPresenter = new NavigationPresenter(this.#menuContainer);
-    this.#navigationPresenter.init(this.#userDetails);
+    this.#sourcedMovies = [...this.#filmsModel.moviesData.movies];
+    this.#renderFilter();
     if(this.#movies.length <= 0) {
       this.#renderMenuWithNoMovies();
     } else {

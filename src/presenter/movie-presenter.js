@@ -16,9 +16,10 @@ export default class MoviePresenter {
     this.#closePrevOpenedPopup = closePrevOpenedPopup;
   }
 
-  #handleClosePopup = (popupMovieElement) => {
+  #handleClosePopup = (popupMovieElement, popupState) => {
     popupMovieElement.remove();
     this.siteBodyElement.classList.remove('hide-overflow');
+    this.#movie = popupState;
     this.init(this.#movie);
   };
 
