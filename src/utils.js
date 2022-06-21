@@ -6,6 +6,13 @@ export const SortType = {
   BY_RATING: 'by-rating',
 };
 
+export const FilterType = {
+  DEFAULT: 'default',
+  WATCHLIST: 'watchlest',
+  HISTORY: 'alreadyWatched',
+  FAVORITES: 'favorite',
+};
+
 export const humanizeFilmReleaseDate = (date) => dayjs(date).format('D MMMM YYYY');
 export const humanizeCommentReleaseDate = (date) => dayjs(date).format('YYYY/M/D HH:mm');
 

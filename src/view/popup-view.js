@@ -1,8 +1,14 @@
 import { humanizeFilmReleaseDate, humanizeCommentReleaseDate } from '../utils';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { nanoid } from 'nanoid';
+import he from 'he';
 
 const MINUTES_IN_HOUR = 60;
+
+const UserActionType = {
+  ADD_COMMENT: 'add-comment',
+  DELETE_COMMENT: 'delete-comment',
+};
 
 const createPopupTemplate = (card) => {
   const {
@@ -86,11 +92,11 @@ const createPopupTemplate = (card) => {
             <img src="./images/emoji/${comments[i].emotion}.png" width="55" height="55" alt="emoji-smile">
           </span>
           <div>
-            <p class="film-details__comment-text">${comments[i].comment}</p>
+            <p class="film-details__comment-text">${he.encode(comments[i].comment)}</p>
             <p class="film-details__comment-info">
               <span class="film-details__comment-author">${comments[i].author}</span>
               <span class="film-details__comment-day">${humanizeCommentReleaseDate(comments[i].date)}</span>
-              <button class="film-details__comment-delete">Delete</button>
+              <button class="film-details__comment-delete" id="${comments[i].id}">Delete</button>
             </p>
           </div>
         </li>`;
@@ -216,6 +222,8 @@ export default class PopupView extends AbstractStatefulView{
   #commentTextElement = null;
   #choosenEmoji = null;
   #emojiCollection = null;
+  #deleteButtonsCollection = null;
+
   constructor (card) {
     super();
     this._state = this.#parseCommentInfoToState(card);
@@ -225,23 +233,36 @@ export default class PopupView extends AbstractStatefulView{
   #setInnerHandlers = () => {
     this.#emojiCollection = this.element.querySelectorAll('input');
     this.#commentTextElement =  this.element.querySelector('.film-details__comment-input');
+    this.#deleteButtonsCollection = this.element.querySelectorAll('.film-details__comment-delete');
 
     for (const elem of this.#emojiCollection) {
       elem.addEventListener('change',this.#adCommentEmojiToPopupView);
     }
 
     this.#commentTextElement.addEventListener('input', this.#addCommentTextToPopupView);
-    document.addEventListener('keydown', this.#handleAddCommentToPopupClick);
+    document.addEventListener('keydown', this.#handleAddCommentToPopupKeydown);
+    for (const button of this.#deleteButtonsCollection) {
+      button.addEventListener('click', this.#handleDeleteCommentInPopupClick);
+    }
   };
 
-  #handleAddCommentToPopupClick = (evt) => {
+  #handleAddCommentToPopupKeydown = (evt) => {
     if (evt.key === 'Enter') {
       evt.preventDefault();
-      const movie = this.parseStateToMoie(this._state);
+      const movie = this.#parseStateToMoie(this._state, UserActionType.ADD_COMMENT);
       this._state.choosenEmoji = null;
       this._state.CommentText = null;
       this.updateElement(movie);
     }
+  };
+
+  #handleDeleteCommentInPopupClick = (evt) => {
+    evt.preventDefault();
+    this._state.comments = this._state.comments.filter((comment) => comment.id !== evt.target.id);
+    const movie = this.#parseStateToMoie(this._state, UserActionType.DELETE_COMMENT);
+    this._state.choosenEmoji = null;
+    this._state.CommentText = null;
+    this.updateElement(movie);
   };
 
   _restoreHandlers = () => {
@@ -275,22 +296,32 @@ export default class PopupView extends AbstractStatefulView{
     CommentText: this.#commentTextElement !== null,
   });
 
-  parseStateToMoie = (state) => {
-    const movie = {...state};
+  #parseStateToMoie = (state, userActionType) => {
 
-    const newComment = {
-      'id' : `${nanoid()}`,
-      'author': 'Ilya O\'Reilly',
-      'comment': movie.CommentText,
-      'date': `${new Date().toISOString()}`,
-      'emotion': movie.choosenEmoji,
-    };
-    movie.comments.push(newComment);
+    if (userActionType === UserActionType.ADD_COMMENT) {
+      const movie = {...state};
 
-    delete movie.choosenEmoji;
-    delete movie.CommentText;
+      const newComment = {
+        'id' : `${nanoid()}`,
+        'author': 'Ilya O\'Reilly',
+        'comment': movie.CommentText,
+        'date': `${new Date().toISOString()}`,
+        'emotion': movie.choosenEmoji,
+      };
+      movie.comments.push(newComment);
 
-    return movie;
+      delete movie.choosenEmoji;
+      delete movie.CommentText;
+
+      return movie;
+    } else {
+      const movie = {...state};
+
+      delete movie.choosenEmoji;
+      delete movie.CommentText;
+
+      return movie;
+    }
   };
 
   setClosePopupClickHandler = (callback) => {
@@ -300,7 +331,7 @@ export default class PopupView extends AbstractStatefulView{
 
   #closePopupClickHandler = (evt) => {
     evt.preventDefault();
-    this._callback.closePopupClick(this.element);
+    this._callback.closePopupClick(this.element, this._state);
   };
 
   setClosePopupKeydownHandler = (callback) => {
@@ -312,11 +343,11 @@ export default class PopupView extends AbstractStatefulView{
     if (evt.key === 'Escape' || evt.key === 'Esc') {
       evt.preventDefault();
       if (this._callback.closePopupKeydown) {
-        this._callback.closePopupKeydown(this.element);
+        this._callback.closePopupKeydown(this.element, this._state);
       }
       delete this._callback.addCommentEnterClick;
       delete this._callback.closePopupKeydown;
-      document.removeEventListener('keydown', this.#handleAddCommentToPopupClick);
+      document.removeEventListener('keydown', this.#handleAddCommentToPopupKeydown);
     }
   };
 

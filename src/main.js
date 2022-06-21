@@ -7,7 +7,7 @@ const siteHeaderElement = document.querySelector('.header');
 const siteMainElement = document.querySelector('.main');
 
 const filmsData = new FilmModel();
-const menuPresenter = new MenuPresenter(siteMainElement, filmsData.moviesData);
+const menuPresenter = new MenuPresenter(siteMainElement, filmsData);
 
 render(new RankUserView(), siteHeaderElement);
 menuPresenter.init();
