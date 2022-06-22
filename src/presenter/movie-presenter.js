@@ -8,12 +8,16 @@ export default class MoviePresenter {
   #changeData = null;
   #movie = null;
   #closePrevOpenedPopup = null;
+  #addCommentToServer = null;
+  #deleteCommentToServer = null;
 
-  constructor (moviesListContainer, siteBodyElement, changeData, closePrevOpenedPopup) {
+  constructor (moviesListContainer, siteBodyElement, changeData, closePrevOpenedPopup, addCommentToServer, deleteCommentToServer) {
     this.siteBodyElement = siteBodyElement;
     this.#moviesListContainer = moviesListContainer;
     this.#changeData = changeData;
     this.#closePrevOpenedPopup = closePrevOpenedPopup;
+    this.#addCommentToServer = addCommentToServer;
+    this.#deleteCommentToServer = deleteCommentToServer;
   }
 
   #handleClosePopup = (popupMovieElement, popupState) => {
@@ -31,6 +35,8 @@ export default class MoviePresenter {
     const popupMovie = new PopupView(movie);
     render(popupMovie, this.siteBodyElement);
 
+    popupMovie.setHandleDeleteCommentInPopupClick(this.#deleteCommentToServer);
+    popupMovie.setHandleAddCommentToPopupKeydown(this.#addCommentToServer);
     popupMovie.setClosePopupKeydownHandler(this.#handleClosePopup);
     popupMovie.setClosePopupClickHandler(this.#handleClosePopup);
     popupMovie.setFavoriteClickHandler(this.#handleFavoriteButtonClick);
