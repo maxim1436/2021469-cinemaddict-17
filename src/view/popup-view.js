@@ -15,9 +15,10 @@ const createPopupTemplate = (card) => {
     choosenEmoji,
     CommentText,
     filmInfo: {
+      alternativeTitle,
       title,
       totalRating,
-      runTime,
+      runtime,
       poster,
       description,
       director,
@@ -38,8 +39,15 @@ const createPopupTemplate = (card) => {
     }
   } = card;
 
-  const filmHoursAmount = Math.floor(runTime / MINUTES_IN_HOUR);
-  const filmMinutesAmount = runTime - (MINUTES_IN_HOUR * Math.floor(runTime / MINUTES_IN_HOUR));
+  const addRuntime = () => {
+    const filmHoursAmount = Math.floor(runtime / MINUTES_IN_HOUR);
+    const filmMinutesAmount = runtime - (MINUTES_IN_HOUR * Math.floor(runtime / MINUTES_IN_HOUR));
+    if (filmHoursAmount <= 0) {
+      return (`${filmMinutesAmount}m`);
+    } else {
+      return (`${filmHoursAmount}h ${filmMinutesAmount}m`);
+    }
+  };
 
   const addControlButtons = () => {
     let controlButtons = '';
@@ -122,7 +130,7 @@ const createPopupTemplate = (card) => {
               <div class="film-details__info-head">
                 <div class="film-details__title-wrap">
                   <h3 class="film-details__title">${title}</h3>
-                  <p class="film-details__title-original">Original: ${title}</p>
+                  <p class="film-details__title-original">Original: ${alternativeTitle}</p>
                 </div>
 
                 <div class="film-details__rating">
@@ -149,7 +157,7 @@ const createPopupTemplate = (card) => {
                 </tr>
                 <tr class="film-details__row">
                   <td class="film-details__term">Runtime</td>
-                  <td class="film-details__cell">${filmHoursAmount}h ${filmMinutesAmount}m</td>
+                  <td class="film-details__cell">${addRuntime()}</td>
                 </tr>
                 <tr class="film-details__row">
                   <td class="film-details__term">Country</td>
@@ -240,24 +248,35 @@ export default class PopupView extends AbstractStatefulView{
     }
 
     this.#commentTextElement.addEventListener('input', this.#addCommentTextToPopupView);
+  };
+
+  setHandleAddCommentToPopupKeydown = (callback) => {
+    this._callback.handleAddCommentToPopupKeydown = callback;
     document.addEventListener('keydown', this.#handleAddCommentToPopupKeydown);
+  };
+
+  #handleAddCommentToPopupKeydown = (evt) => {
+    if (evt.ctrlKey && evt.key === 'Enter') {
+      evt.preventDefault();
+      this._callback.handleAddCommentToPopupKeydown(this._state, {comment: this._state.CommentText, emotion: this._state.choosenEmoji})
+        .then((movie) => {
+          this._state.choosenEmoji = null;
+          this._state.CommentText = null;
+          this.updateElement(movie);
+        });
+    }
+  };
+
+  setHandleDeleteCommentInPopupClick = (callback) => {
+    this._callback.handleDeleteCommentInPopupClick = callback;
     for (const button of this.#deleteButtonsCollection) {
       button.addEventListener('click', this.#handleDeleteCommentInPopupClick);
     }
   };
 
-  #handleAddCommentToPopupKeydown = (evt) => {
-    if (evt.key === 'Enter') {
-      evt.preventDefault();
-      const movie = this.#parseStateToMoie(this._state, UserActionType.ADD_COMMENT);
-      this._state.choosenEmoji = null;
-      this._state.CommentText = null;
-      this.updateElement(movie);
-    }
-  };
-
   #handleDeleteCommentInPopupClick = (evt) => {
     evt.preventDefault();
+    this._callback.handleDeleteCommentInPopupClick(this._state , evt.target.id);
     this._state.comments = this._state.comments.filter((comment) => comment.id !== evt.target.id);
     const movie = this.#parseStateToMoie(this._state, UserActionType.DELETE_COMMENT);
     this._state.choosenEmoji = null;
@@ -267,6 +286,8 @@ export default class PopupView extends AbstractStatefulView{
 
   _restoreHandlers = () => {
     this.#setInnerHandlers();
+    this.setHandleDeleteCommentInPopupClick(this._callback.handleDeleteCommentInPopupClick);
+    this.setHandleAddCommentToPopupKeydown(this._callback.handleAddCommentToPopupKeydown);
     this.setWatchlistClickHandler(this._callback.watchlistClick);
     this.setAlreadyWatchedClickHandler(this._callback.alreadyWatchedClick);
     this.setFavoriteClickHandler(this._callback.favoriteClick);

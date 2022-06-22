@@ -8,7 +8,7 @@ const createFilmCardTemplate = (card) => {
     filmInfo: {
       title,
       totalRating,
-      runTime,
+      runtime,
       poster,
       description,
       genre,
@@ -23,8 +23,17 @@ const createFilmCardTemplate = (card) => {
       favorite,
     }
   } = card;
-  const filmHoursAmount = Math.floor(runTime / MINUTES_IN_HOUR);
-  const filmMinutesAmount = runTime - (MINUTES_IN_HOUR * Math.floor(runTime / MINUTES_IN_HOUR));
+
+  const addRuntime = () => {
+    const filmHoursAmount = Math.floor(runtime / MINUTES_IN_HOUR);
+    const filmMinutesAmount = runtime - (MINUTES_IN_HOUR * Math.floor(runtime / MINUTES_IN_HOUR));
+    if (filmHoursAmount <= 0) {
+      return (`${filmMinutesAmount}m`);
+    } else {
+      return (`${filmHoursAmount}h ${filmMinutesAmount}m`);
+    }
+  };
+
 
   const addControlButtons = () => {
     let controlButtons = '';
@@ -61,6 +70,14 @@ const createFilmCardTemplate = (card) => {
     return controlButtons;
   };
 
+  const addDescription = () => {
+    if (description.length <= 140) {
+      return description;
+    } else {
+      return (`${description.substring(0, 140)}...`);
+    }
+  };
+
   return (`
     <article class="film-card">
     <a class="film-card__link">
@@ -68,11 +85,11 @@ const createFilmCardTemplate = (card) => {
       <p class="film-card__rating">${totalRating}</p>
       <p class="film-card__info">
         <span class="film-card__year">${dayjs(date).format('YYYY')}</span>
-        <span class="film-card__duration">${filmHoursAmount}h ${filmMinutesAmount}m</span>
+        <span class="film-card__duration">${addRuntime()}</span>
         <span class="film-card__genre">${genre.join(', ')}</span>
       </p>
       <img src=${poster} alt="" class="film-card__poster">
-      <p class="film-card__description">${description}</p>
+      <p class="film-card__description">${addDescription()}</p>
       <span class="film-card__comments">${comments.length} comments</span>
     </a>
     <div class="film-card__controls">

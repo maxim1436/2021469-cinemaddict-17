@@ -1,4 +1,5 @@
 import NavigationPresenter from './navigation-presenter.js';
+import RankUserView from '../view/rank-user-view.js';
 import SortView from '../view/sort-view.js';
 import FilmsView from '../view/films-view.js';
 import FilmsListView from '../view/films-list-view.js';
@@ -6,14 +7,15 @@ import ShowMoreButtonView from '../view/show-more-button-view.js';
 import FilmCounterdView from '../view/film-counter-view.js';
 import TopRatedView from '../view/top-rated-view.js';
 import MostCommentedView from '../view/most-commented-view.js';
-import { render } from '../framework/render.js';
-import { getRandomInteger, updateItem, SortType, sortMoviesDateDown, sortMoviesRatingDown, FilterType } from '../utils.js';
+import { render, replace, remove } from '../framework/render.js';
+import { getRandomInteger, SortType, sortMoviesDateDown, sortMoviesRatingDown, FilterType } from '../utils.js';
 import NoFilmView from '../view/no-film-view.js';
 import MoviePresenter from './movie-presenter.js';
 
 const FILMS_CARDS_PER_STEP = 5;
 const siteFooterElement = document.querySelector('.footer');
 const siteBodyElement = document.querySelector('body');
+const siteHeaderElement = document.querySelector('.header');
 
 export default class MenuPresenter {
   #menuContainer = null;
@@ -28,6 +30,7 @@ export default class MenuPresenter {
   #moviePresenter = new Map();
   #navigationPresenter = null;
   #sortComponent = new SortView();
+  #rankUserComponent = null;
 
   constructor (menuContainer, filmsData) {
     this.#menuContainer = menuContainer;
@@ -49,14 +52,17 @@ export default class MenuPresenter {
   }
 
   #handleMovieChange = (updatedMovie, propertyBeforeUpdate) => {
-    this.#movies = updateItem(this.#movies, updatedMovie);
-    this.#sourcedMovies = updateItem(this.#sourcedMovies, updatedMovie);
+    this.#filmsModel.updateMovie(updatedMovie);
 
     if (!updatedMovie.userDetails.watchlist === propertyBeforeUpdate.userDetails.watchlist) {
       const indexToDelete = this.#userDetails.watchlist.findIndex((movie) => movie === updatedMovie.id);
       if (indexToDelete > -1) {
         this.#userDetails.watchlist.splice(indexToDelete, 1);
         this.#navigationPresenter.init(this.#userDetails);
+        if (this.#currentFilterType !== FilterType.DEFAULT) {
+          this.#currentFilterType = FilterType.DEFAULT;
+          this.#handleFilterTypeChange(FilterType.WATCHLIST);
+        }
         return;
       } else {
         this.#userDetails.watchlist.push(updatedMovie.id);
@@ -70,10 +76,16 @@ export default class MenuPresenter {
       if (indexToDelete > -1) {
         this.#userDetails.alreadyWatched.splice(indexToDelete, 1);
         this.#navigationPresenter.init(this.#userDetails);
+        if (this.#currentFilterType !== FilterType.DEFAULT) {
+          this.#currentFilterType = FilterType.DEFAULT;
+          this.#handleFilterTypeChange(FilterType.HISTORY);
+        }
+        this.#renderRankUser();
         return;
       } else {
         this.#userDetails.alreadyWatched.push(updatedMovie.id);
         this.#navigationPresenter.init(this.#userDetails);
+        this.#renderRankUser();
         return;
       }
     }
@@ -83,6 +95,10 @@ export default class MenuPresenter {
       if (indexToDelete > -1) {
         this.#userDetails.favoriteFilms.splice(indexToDelete, 1);
         this.#navigationPresenter.init(this.#userDetails);
+        if (this.#currentFilterType !== FilterType.DEFAULT) {
+          this.#currentFilterType = FilterType.DEFAULT;
+          this.#handleFilterTypeChange(FilterType.FAVORITES);
+        }
       } else {
         this.#userDetails.favoriteFilms.push(updatedMovie.id);
         this.#navigationPresenter.init(this.#userDetails);
@@ -91,7 +107,12 @@ export default class MenuPresenter {
   };
 
   #filterMovies = (filterType) => {
-    this.#movies = [...this.#sourcedMovies];
+    if (this.#currentSortType === SortType.DEFAULT) {
+      this.#movies = [...this.#sourcedMovies];
+    } else {
+      this.#movies = [...this.#sourcedMovies];
+      this.#sortMovies(this.#currentSortType);
+    }
     switch (filterType) {
       case FilterType.WATCHLIST:
         this.#movies = this.#movies.filter((movie) => movie.userDetails.watchlist === true);
@@ -113,9 +134,31 @@ export default class MenuPresenter {
     }
     this.#filterMovies(filterType);
     this.#clearFilmsListContainer();
-    for (let i = 0; i < Math.min(this.#movies.length, FILMS_CARDS_PER_STEP); i++) {
-      this.#renderMovie(this.#movies[i], this.filmsListContainer);
+    if (filterType === FilterType.FAVORITES && this.#userDetails.favoriteFilms.length === 0) {
+      const noFavoriteMoviesMessage = document.createElement('h2');
+      noFavoriteMoviesMessage.classList.add('films-list__title');
+      noFavoriteMoviesMessage.textContent = 'There are no favorite movies now';
+      this.filmsListContainer.appendChild(noFavoriteMoviesMessage);
+    } else if (filterType === FilterType.HISTORY && this.#userDetails.alreadyWatched.length === 0) {
+      const noAlreadyWatchedMoviesMessage = document.createElement('h2');
+      noAlreadyWatchedMoviesMessage.classList.add('films-list__title');
+      noAlreadyWatchedMoviesMessage.textContent = 'There are no watched movies now';
+      this.filmsListContainer.appendChild(noAlreadyWatchedMoviesMessage);
+    } else if (filterType === FilterType.WATCHLIST && this.#userDetails.watchlist.length === 0) {
+      const noWatchlistMoviesMessage = document.createElement('h2');
+      noWatchlistMoviesMessage.classList.add('films-list__title');
+      noWatchlistMoviesMessage.textContent = 'There are no movies to watch now';
+      this.filmsListContainer.appendChild(noWatchlistMoviesMessage);
+    } else {
+      for (let i = 0; i < Math.min(this.#movies.length, FILMS_CARDS_PER_STEP); i++) {
+        this.#renderMovie(this.#movies[i], this.filmsListContainer);
+      }
+      if (this.#movies.length > FILMS_CARDS_PER_STEP) {
+        render(this.#showMoreButtonComponent, this.filmsList.element);
+        this.#showMoreButtonComponent.setClickHandler(this.#handleShowMoreButtonClick);
+      }
     }
+
     this.#renderMovie(this.#movies[getRandomInteger(0, this.#movies.length - 1)], this.topRatedFilmsContainer);
     this.#renderMovie(this.#movies[getRandomInteger(0, this.#movies.length - 1)], this.topRatedFilmsContainer);
     this.#renderMovie(this.#movies[getRandomInteger(0, this.#movies.length - 1)], this.mostCommentedContainer);
@@ -152,6 +195,10 @@ export default class MenuPresenter {
     for (let i = 0; i < Math.min(this.#movies.length, FILMS_CARDS_PER_STEP); i++) {
       this.#renderMovie(this.#movies[i], this.filmsListContainer);
     }
+    if (this.#movies.length > FILMS_CARDS_PER_STEP) {
+      render(this.#showMoreButtonComponent, this.filmsList.element);
+      this.#showMoreButtonComponent.setClickHandler(this.#handleShowMoreButtonClick);
+    }
     this.#renderMovie(this.#movies[getRandomInteger(0, this.#movies.length - 1)], this.topRatedFilmsContainer);
     this.#renderMovie(this.#movies[getRandomInteger(0, this.#movies.length - 1)], this.topRatedFilmsContainer);
     this.#renderMovie(this.#movies[getRandomInteger(0, this.#movies.length - 1)], this.mostCommentedContainer);
@@ -164,7 +211,7 @@ export default class MenuPresenter {
   };
 
   #renderMovie = (movie, container) => {
-    const cardMovie = new MoviePresenter(container, siteBodyElement, this.#handleMovieChange, this.#closePrevOpenedPopup);
+    const cardMovie = new MoviePresenter(container, siteBodyElement, this.#handleMovieChange, this.#closePrevOpenedPopup, this.#filmsModel.addComment, this.#filmsModel.deleteComment);
     cardMovie.init(movie);
     this.#moviePresenter.set(movie.id, cardMovie);
   };
@@ -220,10 +267,28 @@ export default class MenuPresenter {
     this.#moviePresenter.forEach((presenter) => presenter.destroy());
     this.#renderedFilmCount = FILMS_CARDS_PER_STEP;
     this.#moviePresenter.clear();
+    this.#showMoreButtonComponent.element.remove();
     this.filmsListContainer.innerHTML = '';
   };
 
+  #renderRankUser = () => {
+    if (this.#userDetails.alreadyWatched.length > 0) {
+      const prevRankUserComponent = this.#rankUserComponent;
+      this.#rankUserComponent = new RankUserView(this.#userDetails.alreadyWatched);
+      if (prevRankUserComponent === null) {
+        render(this.#rankUserComponent, siteHeaderElement);
+      } else {
+        replace(this.#rankUserComponent, prevRankUserComponent);
+      }
+      remove(prevRankUserComponent);
+    } else {
+      this.#rankUserComponent.element.remove();
+      this.#rankUserComponent = null;
+    }
+  };
+
   init = () => {
+    this.#renderRankUser();
     this.#sourcedMovies = [...this.#filmsModel.moviesData.movies];
     this.#renderFilter();
     if(this.#movies.length <= 0) {
