@@ -6,7 +6,7 @@ const createFilmCounterTemplate = (filmsCount) => (`
   </section>
 `);
 
-export default class FilmCounterdView extends AbstractView {
+export default class FilmCounterView extends AbstractView {
   constructor (filmsCount) {
     super();
     this.filmsCount = filmsCount;

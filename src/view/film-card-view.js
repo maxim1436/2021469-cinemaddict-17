@@ -1,7 +1,10 @@
 import AbstractView from '../framework/view/abstract-view';
 import dayjs from 'dayjs';
+import { addControlButtons } from '../utils';
 
 const MINUTES_IN_HOUR = 60;
+const MAX_DESCRIPTION_LENGTH = 140;
+const MIN_DESCRIPTION_LENGTH = 0;
 
 const createFilmCardTemplate = (card) => {
   const {
@@ -35,46 +38,11 @@ const createFilmCardTemplate = (card) => {
   };
 
 
-  const addControlButtons = () => {
-    let controlButtons = '';
-
-    if (watchlist) {
-      controlButtons = `${controlButtons}
-      <button class="film-card__controls-item film-card__controls-item--add-to-watchlist film-card__controls-item--active" type="button">Add to watchlist</button>
-      `;
-    } else {
-      controlButtons = `${controlButtons}
-        <button class="film-card__controls-item film-card__controls-item--add-to-watchlist" type="button">Add to watchlist</button>
-      `;
-    }
-
-    if (alreadyWatched) {
-      controlButtons = `${controlButtons}
-        <button class="film-card__controls-item film-card__controls-item--mark-as-watched film-card__controls-item--active" type="button">Mark as watched</button>
-      `;
-    } else {
-      controlButtons = `${controlButtons}
-        <button class="film-card__controls-item film-card__controls-item--mark-as-watched" type="button">Mark as watched</button>
-      `;
-    }
-
-    if (favorite) {
-      controlButtons = `${controlButtons}
-        <button class="film-card__controls-item film-card__controls-item--favorite film-card__controls-item--active" type="button">Mark as favorite</button>
-      `;
-    } else {
-      controlButtons = `${controlButtons}
-        <button class="film-card__controls-item film-card__controls-item--favorite" type="button">Mark as favorite</button>
-      `;
-    }
-    return controlButtons;
-  };
-
   const addDescription = () => {
-    if (description.length <= 140) {
+    if (description.length <= MAX_DESCRIPTION_LENGTH) {
       return description;
     } else {
-      return (`${description.substring(0, 140)}...`);
+      return (`${description.substring(MIN_DESCRIPTION_LENGTH, MAX_DESCRIPTION_LENGTH)}...`);
     }
   };
 
@@ -93,7 +61,7 @@ const createFilmCardTemplate = (card) => {
       <span class="film-card__comments">${comments.length} comments</span>
     </a>
     <div class="film-card__controls">
-      ${addControlButtons()}
+      ${addControlButtons(watchlist, alreadyWatched, favorite)}
     </div>
     </article>
   `);

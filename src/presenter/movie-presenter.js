@@ -10,14 +10,16 @@ export default class MoviePresenter {
   #closePrevOpenedPopup = null;
   #addCommentToServer = null;
   #deleteCommentToServer = null;
+  #renderMostCommentedMovies = null;
 
-  constructor (moviesListContainer, siteBodyElement, changeData, closePrevOpenedPopup, addCommentToServer, deleteCommentToServer) {
+  constructor (moviesListContainer, siteBodyElement, changeData, closePrevOpenedPopup, addCommentToServer, deleteCommentToServer, renderMostCommentedMovies) {
     this.siteBodyElement = siteBodyElement;
     this.#moviesListContainer = moviesListContainer;
     this.#changeData = changeData;
     this.#closePrevOpenedPopup = closePrevOpenedPopup;
     this.#addCommentToServer = addCommentToServer;
     this.#deleteCommentToServer = deleteCommentToServer;
+    this.#renderMostCommentedMovies = renderMostCommentedMovies;
   }
 
   #handleClosePopup = (popupMovieElement, popupState) => {
@@ -32,7 +34,7 @@ export default class MoviePresenter {
 
     this.#closePrevOpenedPopup();
 
-    const popupMovie = new PopupView(movie);
+    const popupMovie = new PopupView(movie, this.init, this.#renderMostCommentedMovies);
     render(popupMovie, this.siteBodyElement);
 
     popupMovie.setHandleDeleteCommentInPopupClick(this.#deleteCommentToServer);
@@ -61,6 +63,7 @@ export default class MoviePresenter {
       this.#movie.userDetails.favorite = true;
       propertyBeforeUpdate.userDetails.favorite = false;
     }
+    this.init(this.#movie);
     this.#changeData(this.#movie, propertyBeforeUpdate);
   };
 
@@ -81,6 +84,7 @@ export default class MoviePresenter {
       this.#movie.userDetails.watchlist = true;
       propertyBeforeUpdate.userDetails.watchlist = false;
     }
+    this.init(this.#movie);
     this.#changeData(this.#movie, propertyBeforeUpdate);
   };
 
@@ -101,6 +105,7 @@ export default class MoviePresenter {
       this.#movie.userDetails.alreadyWatched = true;
       propertyBeforeUpdate.userDetails.alreadyWatched = false;
     }
+    this.init(this.#movie);
     this.#changeData(this.#movie, propertyBeforeUpdate);
   };
 
