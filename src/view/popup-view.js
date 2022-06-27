@@ -1,9 +1,16 @@
-import { humanizeFilmReleaseDate, humanizeCommentReleaseDate } from '../utils';
+import { humanizeFilmReleaseDate, humanizeCommentReleaseDate, addControlButtons } from '../utils';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { nanoid } from 'nanoid';
+import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 import he from 'he';
 
 const MINUTES_IN_HOUR = 60;
+const DELAY = 1000;
+
+const TimeLimit = {
+  LOWER_LIMIT: 350,
+  UPPER_LIMIT: 1000,
+};
 
 const UserActionType = {
   ADD_COMMENT: 'add-comment',
@@ -14,6 +21,7 @@ const createPopupTemplate = (card) => {
   const {
     choosenEmoji,
     CommentText,
+    isDisabled,
     filmInfo: {
       alternativeTitle,
       title,
@@ -49,62 +57,27 @@ const createPopupTemplate = (card) => {
     }
   };
 
-  const addControlButtons = () => {
-    let controlButtons = '';
-
-    if (watchlist) {
-      controlButtons = `${controlButtons}
-      <button class="film-card__controls-item film-card__controls-item--add-to-watchlist film-card__controls-item--active" type="button">Add to watchlist</button>
-      `;
-    } else {
-      controlButtons = `${controlButtons}
-        <button class="film-card__controls-item film-card__controls-item--add-to-watchlist" type="button">Add to watchlist</button>
-      `;
-    }
-
-    if (alreadyWatched) {
-      controlButtons = `${controlButtons}
-        <button class="film-card__controls-item film-card__controls-item--mark-as-watched film-card__controls-item--active" type="button">Mark as watched</button>
-      `;
-    } else {
-      controlButtons = `${controlButtons}
-        <button class="film-card__controls-item film-card__controls-item--mark-as-watched" type="button">Mark as watched</button>
-      `;
-    }
-
-    if (favorite) {
-      controlButtons = `${controlButtons}
-        <button class="film-card__controls-item film-card__controls-item--favorite film-card__controls-item--active" type="button">Mark as favorite</button>
-      `;
-    } else {
-      controlButtons = `${controlButtons}
-        <button class="film-card__controls-item film-card__controls-item--favorite" type="button">Mark as favorite</button>
-      `;
-    }
-    return controlButtons;
-  };
-
   const addGenreElement = () => {
     let genreName = '';
-    for (let i = 0; i < genre.length; i++) {
-      genreName = `${genreName}<span class="film-details__genre">${genre[i]}</span>`;
+    for (const genreNameElement of genre) {
+      genreName = `${genreName}<span class="film-details__genre">${genreNameElement}</span>`;
     }
     return genreName;
   };
 
   const addCommentElement = () => {
     let commentElement = '';
-    for (let i = 0; i < comments.length; i++) {
+    for (const elementOfCommentsArray of comments) {
       commentElement = `${commentElement}<li class="film-details__comment">
           <span class="film-details__comment-emoji">
-            <img src="./images/emoji/${comments[i].emotion}.png" width="55" height="55" alt="emoji-smile">
+            <img src="./images/emoji/${elementOfCommentsArray.emotion}.png" width="55" height="55" alt="emoji-smile">
           </span>
           <div>
-            <p class="film-details__comment-text">${he.encode(comments[i].comment)}</p>
+            <p class="film-details__comment-text">${he.encode(elementOfCommentsArray.comment)}</p>
             <p class="film-details__comment-info">
-              <span class="film-details__comment-author">${comments[i].author}</span>
-              <span class="film-details__comment-day">${humanizeCommentReleaseDate(comments[i].date)}</span>
-              <button class="film-details__comment-delete" id="${comments[i].id}">Delete</button>
+              <span class="film-details__comment-author">${elementOfCommentsArray.author}</span>
+              <span class="film-details__comment-day">${humanizeCommentReleaseDate(elementOfCommentsArray.date)}</span>
+              <button class="film-details__comment-delete" id="${elementOfCommentsArray.id}" ${isDisabled ? 'disabled' : ''}>${isDisabled ? 'Deleting...' : 'Delete'}</button>
             </p>
           </div>
         </li>`;
@@ -178,7 +151,7 @@ const createPopupTemplate = (card) => {
           </div>
 
           <section class="film-details__controls">
-            ${addControlButtons()}
+            ${addControlButtons(watchlist, alreadyWatched, favorite)}
           </section>
         </div>
 
@@ -231,11 +204,16 @@ export default class PopupView extends AbstractStatefulView{
   #choosenEmoji = null;
   #emojiCollection = null;
   #deleteButtonsCollection = null;
+  #reinitMovieCard = null;
+  #renderMostCommentedMovies = null;
+  #uiBlocker = new UiBlocker(TimeLimit.LOWER_LIMIT, TimeLimit.UPPER_LIMIT);
 
-  constructor (card) {
+  constructor (card, reinitMovieCard, renderMostCommentedMovies) {
     super();
     this._state = this.#parseCommentInfoToState(card);
     this.#setInnerHandlers();
+    this.#reinitMovieCard = reinitMovieCard;
+    this.#renderMostCommentedMovies = renderMostCommentedMovies;
   }
 
   #setInnerHandlers = () => {
@@ -258,12 +236,26 @@ export default class PopupView extends AbstractStatefulView{
   #handleAddCommentToPopupKeydown = (evt) => {
     if (evt.ctrlKey && evt.key === 'Enter') {
       evt.preventDefault();
+      this.#uiBlocker.block();
       this._callback.handleAddCommentToPopupKeydown(this._state, {comment: this._state.CommentText, emotion: this._state.choosenEmoji})
         .then((movie) => {
-          this._state.choosenEmoji = null;
-          this._state.CommentText = null;
-          this.updateElement(movie);
+          if (movie) {
+            this._state.choosenEmoji = null;
+            this._state.CommentText = null;
+            this._state.isDisabled = false;
+            this.updateElement(movie);
+            this.#renderMostCommentedMovies(movie);
+            this.#reinitMovieCard(movie);
+            this.#uiBlocker.unblock();
+          } else {
+            throw new Error();
+          }
+        })
+        .catch(() => {
+          this.element.querySelector('.film-details__inner').classList.add('shake');
+          this.#uiBlocker.unblock();
         });
+
     }
   };
 
@@ -276,12 +268,24 @@ export default class PopupView extends AbstractStatefulView{
 
   #handleDeleteCommentInPopupClick = (evt) => {
     evt.preventDefault();
-    this._callback.handleDeleteCommentInPopupClick(this._state , evt.target.id);
-    this._state.comments = this._state.comments.filter((comment) => comment.id !== evt.target.id);
-    const movie = this.#parseStateToMoie(this._state, UserActionType.DELETE_COMMENT);
-    this._state.choosenEmoji = null;
-    this._state.CommentText = null;
-    this.updateElement(movie);
+    this._state.isDisabled = true;
+    this.updateElement(this._state);
+    this._callback.handleDeleteCommentInPopupClick(this._state , evt.target.id).then(() => {
+      this._state.comments = this._state.comments.filter((comment) => comment.id !== evt.target.id);
+      const movie = this.#parseStateToMoie(this._state, UserActionType.DELETE_COMMENT);
+      this._state.choosenEmoji = null;
+      this._state.CommentText = null;
+      this._state.isDisabled = false;
+      this.updateElement(movie);
+      this.#renderMostCommentedMovies(movie);
+      this.#reinitMovieCard(movie);
+    }).catch(() => {
+      this.element.querySelector('.film-details__inner').classList.add('shake');
+      setTimeout(() => {
+        this._state.isDisabled = false;
+        this.updateElement(this._state);
+      }, DELAY);
+    });
   };
 
   _restoreHandlers = () => {
@@ -315,6 +319,7 @@ export default class PopupView extends AbstractStatefulView{
   #parseCommentInfoToState = (movie) => ({...movie,
     choosenEmoji: this.#choosenEmoji !== null,
     CommentText: this.#commentTextElement !== null,
+    isDisabled: false,
   });
 
   #parseStateToMoie = (state, userActionType) => {
@@ -333,6 +338,7 @@ export default class PopupView extends AbstractStatefulView{
 
       delete movie.choosenEmoji;
       delete movie.CommentText;
+      delete movie.isDisabled;
 
       return movie;
     } else {
@@ -340,6 +346,7 @@ export default class PopupView extends AbstractStatefulView{
 
       delete movie.choosenEmoji;
       delete movie.CommentText;
+      delete movie.isDisabled;
 
       return movie;
     }
@@ -368,7 +375,9 @@ export default class PopupView extends AbstractStatefulView{
       }
       delete this._callback.addCommentEnterClick;
       delete this._callback.closePopupKeydown;
+      document.removeEventListener('keydown', this.#closePopupKeydownHandler);
       document.removeEventListener('keydown', this.#handleAddCommentToPopupKeydown);
+      document.removeEventListener('click', this.#closePopupClickHandler);
     }
   };
 

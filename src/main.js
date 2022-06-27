@@ -1,5 +1,5 @@
 import MenuPresenter from './presenter/menu-presenter.js';
-import FilmModel from './model/data.js';
+import FilmModel from './model/film-model.js';
 import MoviesApiService from './movie-api-service.js';
 import LoadingView from './view/loading-view.js';
 import NavigationView from './view/navigation-view.js';

@@ -23,29 +23,6 @@ export const getRandomInteger = (a = 0, b = 1) => {
   return Math.floor(lower + Math.random() * (upper - lower + 1));
 };
 
-export const getRandomFraction = (min, max, rate) => {
-  if ((max < 0) || (min < 0)) {
-    throw RangeError('The argument must not be negative');
-  }
-  const a = Math.random();
-  const result = (max >= min) ?
-    ((a * (max - min)) + min).toFixed(rate) :
-    ((a * (min - max)) + max).toFixed(rate);
-  return parseFloat(result);
-};
-
-export const getNonRepeatingNumber = (array, min, max) => {
-  const elem = getRandomInteger(min, max);
-  if (array.includes(elem) === false) {
-    array.push(elem);
-    return elem;
-  } else {
-    return getNonRepeatingNumber(array, min, max);
-  }
-};
-
-export const getRandomElementOfArray = (array) => array[getRandomInteger(0, array.length - 1)];
-
 export const updateItem = (items, update) => {
   const index = items.findIndex((item) => item.id === update.id);
 
@@ -97,3 +74,49 @@ export const sortMoviesDateDown = (movieA, movieB) => {
 };
 
 export const sortMoviesRatingDown = (movieA, movieB) => movieB.filmInfo.totalRating - movieA.filmInfo.totalRating;
+
+export const sortMostCommentedMoviesDown = (movieA, movieB) => movieB.comments.length - movieA.comments.length;
+
+export const isArraysEqual = (movies, sourcedMovies) => {
+  for (let i = 0; i < movies.length; i++) {
+    if (movies[i] !== sourcedMovies[i]) {
+      return false;
+    }
+  }
+  return true;
+};
+
+export const addControlButtons = (watchlist, alreadyWatched, favorite) => {
+  let controlButtons = '';
+
+  if (watchlist) {
+    controlButtons = `${controlButtons}
+    <button class="film-card__controls-item film-card__controls-item--add-to-watchlist film-card__controls-item--active" type="button">Add to watchlist</button>
+    `;
+  } else {
+    controlButtons = `${controlButtons}
+      <button class="film-card__controls-item film-card__controls-item--add-to-watchlist" type="button">Add to watchlist</button>
+    `;
+  }
+
+  if (alreadyWatched) {
+    controlButtons = `${controlButtons}
+      <button class="film-card__controls-item film-card__controls-item--mark-as-watched film-card__controls-item--active" type="button">Mark as watched</button>
+    `;
+  } else {
+    controlButtons = `${controlButtons}
+      <button class="film-card__controls-item film-card__controls-item--mark-as-watched" type="button">Mark as watched</button>
+    `;
+  }
+
+  if (favorite) {
+    controlButtons = `${controlButtons}
+      <button class="film-card__controls-item film-card__controls-item--favorite film-card__controls-item--active" type="button">Mark as favorite</button>
+    `;
+  } else {
+    controlButtons = `${controlButtons}
+      <button class="film-card__controls-item film-card__controls-item--favorite" type="button">Mark as favorite</button>
+    `;
+  }
+  return controlButtons;
+};

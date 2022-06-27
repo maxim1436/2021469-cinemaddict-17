@@ -39,6 +39,10 @@ export default class NavigationView extends AbstractView{
     }
 
     evt.preventDefault();
-    this._callback.filterTypeChange(evt.target.dataset.filterType);
+    const selectedFilterType = this.element.querySelector('.main-navigation__item--active');
+    if (selectedFilterType !== evt.target) {
+      selectedFilterType.classList.remove('main-navigation__item--active');
+    }
+    this._callback.filterTypeChange(evt.target.dataset.filterType, evt.target);
   };
 }

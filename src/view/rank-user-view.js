@@ -1,16 +1,20 @@
 import AbstractView from '../framework/view/abstract-view.js';
 
+const MIN_ALREADY_WATCHED_MOVIES_LENGTH = 1;
+const MIDDLE_ALREADY_WATCHED_MOVIES_LENGTH = 11;
+const MAX_ALREADY_WATCHED_MOVIES_LENGTH = 21;
+
 const createRankUserTemplate = (alreadyWatchedMovies) => {
   const getUserRank = () => {
-    if (alreadyWatchedMovies.length >= 1 && alreadyWatchedMovies.length <= 10) {
+    if (alreadyWatchedMovies.length >= MIN_ALREADY_WATCHED_MOVIES_LENGTH && alreadyWatchedMovies.length < MIDDLE_ALREADY_WATCHED_MOVIES_LENGTH) {
       return 'novice';
     }
 
-    if (alreadyWatchedMovies.length >= 11 && alreadyWatchedMovies.length <= 20) {
+    if (alreadyWatchedMovies.length >= MIDDLE_ALREADY_WATCHED_MOVIES_LENGTH && alreadyWatchedMovies.length < MAX_ALREADY_WATCHED_MOVIES_LENGTH) {
       return 'fan';
     }
 
-    if (alreadyWatchedMovies.length >= 21) {
+    if (alreadyWatchedMovies.length >= MAX_ALREADY_WATCHED_MOVIES_LENGTH) {
       return 'movie buff';
     }
   };
